@@ -1,0 +1,5 @@
+{"Name":"SessionStarted","GFXAdapterType":"Direct3D11","Count":1,"Version":"5","Time":"2025-03-25T00:26:05Z"}
+{"Name":"UIStateUsed","State":"menu.start","Duration":0.8069164}
+{"Name":"UIStateUsed","State":"menu.start_loadmainmenu","Duration":2.2437746}
+{"Name":"UIStateUsed","State":"menu.mainmenu","Duration":13.8582407}
+{"Name":"GameRunning","Duration":18.112056}

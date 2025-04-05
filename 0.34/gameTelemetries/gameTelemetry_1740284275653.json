@@ -1,0 +1,11 @@
+{"Name":"SessionStarted","GFXAdapterType":"Direct3D11","Count":1,"Version":"5","Time":"2025-02-23T04:17:55Z"}
+{"Name":"ControlsUsed","Method":"Keyboard","Duration":113.1417642}
+{"Name":"VehicleUsed","Vehicle":"etk800","CamMode":"orbit","Config":"","Duration":117.7265245}
+{"Name":"ScenarioRunning","ScenarioName":"Driving Analysis - Google Cloud Event","File":"/levels/automation_test_track/scenarios/Driving Analysis - Google Cloud Event.json","Duration":115.7174041}
+{"LevelName":"/levels/automation_test_track/main.level.json","Name":"LevelLoaded","Duration":122.3259309}
+{"Name":"UIStateUsed","State":"loading","Duration":21.3430226}
+{"Name":"UIStateUsed","State":"scenario-start","Duration":7.700377}
+{"Name":"UIStateUsed","State":"play","Duration":73.1858151}
+{"Name":"UIStateUsed","State":"menu","Duration":31.1612466}
+{"Name":"ScenarioEnded","ScenarioName":"Driving Analysis - Google Cloud Event","Count":1,"File":"/levels/automation_test_track/scenarios/Driving Analysis - Google Cloud Event.json","Result":"aborted"}
+{"Name":"GameRunning","Duration":135.5940646}

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/ford.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Race Day Data & Diagnostics</title>
+    <script type="module" crossorigin src="/assets/index-PXsrfpp4.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DY7wXivd.css">
+    
+    <!-- Session Persistence - Improved -->
+    <script>
+      // Handle page refresh to maintain session state
+      window.onload = function() {
+        // Check if there's a saved player ID in sessionStorage
+        const savedPlayerId = sessionStorage.getItem('playerId');
+        // Check if we're already on the summary page
+        const currentPath = window.location.pathname + window.location.hash;
+        const isOnSummaryPage = currentPath.includes('/summary') || currentPath.includes('#/summary');
+        
+        console.log('Current path:', currentPath);
+        console.log('Is on summary page:', isOnSummaryPage);
+        console.log('Saved player ID:', savedPlayerId);
+        
+        // If we have a saved player ID (regardless of current page)
+        if (savedPlayerId) {
+          console.log('Attempting to restore session for player: ' + savedPlayerId);
+          
+          // For initial debugging - save the current URL
+          const initialUrl = window.location.href;
+          
+          // First, try to detect if we're looking at a summary page
+          // Check URL patterns that might indicate summary page
+          const summaryPatterns = [
+            '/summary',
+            '#/summary',
+            'vehicle-performance',
+            'report'
+          ];
+          
+          const mightBeOnSummaryPage = summaryPatterns.some(pattern => 
+            currentPath.toLowerCase().includes(pattern.toLowerCase())
+          );
+          
+          // Check page content for summary elements (if DOM is already loaded)
+          const hasSummaryElements = 
+            document.title.includes('Performance') || 
+            document.title.includes('Report') ||
+            document.querySelector('.vehicle-performance') !== null ||
+            (document.querySelector('h1, h2, h3') && 
+             document.querySelector('h1, h2, h3').textContent.includes('Performance'));
+            
+          // If we're possibly on a summary page already, don't redirect
+          if (mightBeOnSummaryPage || hasSummaryElements) {
+            console.log('Already on a summary page, not redirecting');
+            return;
+          }
+          
+          // Try direct navigation if possible
+          try {
+            window.location.replace('#/summary/' + savedPlayerId);
+            console.log('Redirected to: #/summary/' + savedPlayerId);
+            return;
+          } catch (e) {
+            console.log('Direct navigation failed:', e);
+          }
+          
+          // Fallback: Fill the form and submit (more reliable)
+          setTimeout(() => {
+            // Find the player ID input field
+            const playerIdInput = document.querySelector('input[placeholder="Enter Player ID"]');
+            const startButton = document.querySelector('button:not([aria-label])');
+            
+            if (playerIdInput && startButton) {
+              console.log('Form found, filling in player ID and submitting');
+              // Set the value and trigger a change event
+              playerIdInput.value = savedPlayerId;
+              
+              // Dispatch input event to ensure React state is updated
+              const event = new Event('input', { bubbles: true });
+              playerIdInput.dispatchEvent(event);
+              
+              // Click the start button
+              setTimeout(() => {
+                startButton.click();
+                console.log('Start button clicked');
+              }, 500);
+            } else {
+              console.log('Form elements not found');
+            }
+          }, 1000);
+        }
+      };
+      
+      // Listen for form submissions to save player ID
+      document.addEventListener('submit', function(e) {
+        // Look for player ID input field
+        const playerIdInput = document.querySelector('input[placeholder="Enter Player ID"]');
+        if (playerIdInput && playerIdInput.value) {
+          // Save the player ID to session storage
+          sessionStorage.setItem('playerId', playerIdInput.value);
+          console.log('Saved player ID: ' + playerIdInput.value);
+          
+          // Also save to localStorage for longer persistence (survives browser close)
+          localStorage.setItem('lastPlayerId', playerIdInput.value);
+        }
+      });
+      
+      // Create a global function to handle exit button clicks
+      window.handleExit = function() {
+        // Clear session storage when exit is clicked
+        sessionStorage.removeItem('playerId');
+        console.log('Session cleared');
+        
+        // Redirect to home page
+        window.location.href = '/';
+      };
+      
+      // Check for hash change events to update session state
+      window.addEventListener('hashchange', function() {
+        // Extract player ID from URL if present in format #/summary/PLAYER_ID
+        const urlMatch = window.location.hash.match(/#\/summary\/([^\/]+)/);
+        if (urlMatch && urlMatch[1]) {
+          sessionStorage.setItem('playerId', urlMatch[1]);
+          console.log('Updated player ID from URL: ' + urlMatch[1]);
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    
+    <!-- Logo Replacement Script - Targeted -->
+    <script>
+      // Simple focused script to fix logo sizes without inline styles
+      document.addEventListener('DOMContentLoaded', function() {
+        console.log('Logo replacement script running...');
+        
+        // Function to replace ONLY the Miracle logo with Google Cloud Next logo
+        function replaceLogo() {
+          // 1. Add CSS class definitions to the document
+          if (!document.getElementById('logo-size-styles')) {
+            const styleEl = document.createElement('style');
+            styleEl.id = 'logo-size-styles';
+            styleEl.textContent = `
+              .small-next-logo {
+                width: 60px !important;
+                height: auto !important;
+              }
+              .original-cloud-logo {
+                /* This ensures original size is preserved */
+                width: auto !important;
+                height: auto !important;
+              }
+            `;
+            document.head.appendChild(styleEl);
+          }
+          
+          // 2. Replace the Miracle logo with Google Cloud Next logo
+          document.querySelectorAll('img[src*="miracle"]').forEach(img => {
+            if (!img.src.includes('cloud_next_25.png')) {
+              img.src = "/assets/cloud_next_25.png";
+              img.alt = "Google Cloud Next";
+              img.classList.add('small-next-logo'); // Add the CSS class instead of inline style
+              console.log('Replaced miracle logo with cloud_next_25.png');
+            }
+          });
+          
+          // 3. Ensure Google Cloud logos maintain original size
+          document.querySelectorAll('img[alt="Google Cloud"]').forEach(img => {
+            img.classList.add('original-cloud-logo');
+          });
+        }
+        
+        // Run the function initially and on any DOM changes
+        replaceLogo();
+        
+        // Set up mutation observer for dynamic changes
+        const observer = new MutationObserver(replaceLogo);
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['src', 'alt', 'class']
+        });
+        
+        // Also check a few more times after load
+        setTimeout(replaceLogo, 1000);
+        setTimeout(replaceLogo, 2000);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+{"Name":"SessionStarted","GFXAdapterType":"Direct3D11","Count":1,"Version":"5","Time":"2025-03-25T20:54:04Z"}
+{"Name":"ScenarioEnded","ScenarioName":"Vehicle Driving Analysis - Google Cloud Next 25","Count":1,"File":"/levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.json","Result":"aborted"}
+{"Name":"VehicleUsed","Vehicle":"bolide","CamMode":"orbit","Config":"","Duration":31.7743487}
+{"Name":"ScenarioRunning","ScenarioName":"Vehicle Driving Analysis - Google Cloud Next 25","File":"/levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.json","Duration":29.9996294}
+{"Name":"UIStateUsed","State":"menu.start","Duration":0.9376126}
+{"Name":"UIStateUsed","State":"menu.start_loadmainmenu","Duration":0.5337019}
+{"Name":"UIStateUsed","State":"loading","Duration":11.9463504}
+{"Name":"UIStateUsed","State":"menu.mainmenu","Duration":4.1715722}
+{"Name":"UIStateUsed","State":"scenario-start","Duration":2.0062688}
+{"Name":"UIStateUsed","State":"play","Duration":20.3051971}
+{"Name":"UIStateUsed","State":"menu.bigmap","Duration":5.2974816}
+{"Name":"ControlsUsed","Method":"Keyboard","Duration":28.0569264}
+{"LevelName":"/levels/automation_test_track/main.level.json","Name":"LevelLoaded","Duration":34.9140418}
+{"Name":"BigMapActive","Duration":2.9617531}
+{"Name":"GameRunning","Duration":46.7676084}

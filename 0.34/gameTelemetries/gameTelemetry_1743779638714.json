@@ -1,0 +1,10 @@
+{"Name":"SessionStarted","GFXAdapterType":"Direct3D11","Count":1,"Version":"5","Time":"2025-04-04T15:13:58Z"}
+{"Name":"ControlsUsed","Method":"Keyboard","Duration":25.4619467}
+{"Name":"VehicleUsed","Vehicle":"bolide","CamMode":"orbit","Config":"","Duration":30.510979}
+{"Name":"ScenarioRunning","ScenarioName":"Vehicle Driving Analysis - Google Cloud Next 25","File":"/levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.json","Duration":27.9076726}
+{"LevelName":"/levels/automation_test_track/main.level.json","Name":"LevelLoaded","Duration":36.3138745}
+{"Name":"UIStateUsed","State":"loading","Duration":26.0660236}
+{"Name":"UIStateUsed","State":"scenario-start","Duration":2.9288055}
+{"Name":"UIStateUsed","State":"play","Duration":21.9818998}
+{"Name":"ScenarioEnded","ScenarioName":"Vehicle Driving Analysis - Google Cloud Next 25","Count":1,"File":"/levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.json","Result":"aborted"}
+{"Name":"GameRunning","Duration":52.4854748}

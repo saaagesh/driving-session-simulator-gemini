@@ -8,9 +8,6 @@ import json
 import os
 import time
 import random
-import datetime
-import uuid
-import config  # Import the config module
 
 beamng = BeamNGpy('localhost', 60152, home='C:/Program Files (x86)/Steam/steamapps/common/BeamNG.drive', user='C:/Users/Public/drive-session-summarizer')
 
@@ -67,51 +64,31 @@ def game(player_id):
 
     beamng.close()
     df = pd.DataFrame(data, columns=column_names)
-    
-    # Create telematics directory if it doesn't exist
-    os.makedirs('telematics', exist_ok=True)
-    
     df.to_csv(f'telematics/{player_id}_vehicle_data.csv', index=False)
-    session_id = upload_to_bigquery(f'telematics/{player_id}_vehicle_data.csv', player_id)
+    # upload_to_bigquery(f'telematics/{player_id}_vehicle_data.csv', player_id)
     print(f"Data saved for player {player_id}")
     print(df.head())
-    return session_id
 
-def upload_to_bigquery(csv_file_path, player_id):
-    client = bigquery.Client()
-    # table_id_full = f"{config.PROJECT_ID}.{config.DATASET_ID}.{player_id}"
-    table_id_full = f"{config.PROJECT_ID}.{config.DATASET_ID}.vehicle_data"
-    
-    # Add a timestamp column to track when the session occurred
-    df = pd.read_csv(csv_file_path)
-    df['session_timestamp'] = datetime.datetime.now().isoformat()
-    session_id = str(uuid.uuid4())  # Add a unique session ID
-    df['session_id'] = session_id
+# def upload_to_bigquery(csv_file_path, table_id):
+#     client = bigquery.Client()
+#     table_id_full = f"fresh-span-400217.simulated_vehicle_data.{table_id}"
 
-    if 'player_id' not in df.columns:
-        df['player_id'] = player_id
-    
-    # Save the updated CSV
-    df.to_csv(csv_file_path, index=False)
-    
-    job_config = bigquery.LoadJobConfig(
-        source_format=bigquery.SourceFormat.CSV,
-        skip_leading_rows=1,
-        autodetect=True,
-    )
+#     job_config = bigquery.LoadJobConfig(
+#         source_format=bigquery.SourceFormat.CSV,
+#         skip_leading_rows=1,  
+#         autodetect=True, 
+#     )
 
-    with open(csv_file_path, "rb") as source_file:
-        try:
-            load_job = client.load_table_from_file(source_file, table_id_full, job_config=job_config)
-            load_job.result()  # Wait for the job to complete
-            destination_table = client.get_table(table_id_full)
-            print(f"Loaded {destination_table.num_rows} rows into {table_id_full}.")
-        except Exception as e:
-            print(f"Error uploading to BigQuery: {str(e)}")
-    
-    return session_id
+#     with open(csv_file_path, "rb") as source_file:
+#         load_job = client.load_table_from_file(source_file, table_id_full, job_config=job_config)
 
+#     load_job.result()  
+
+#     destination_table = client.get_table(table_id_full)
+#     print(f"Loaded {destination_table.num_rows} rows into {table_id_full}.")
+    
 def generate_engine_dtc_codes(num_codes=5):
+
     engine_issues = {
         'fuel_system': range(100, 200),   # P0100 to P0199
         'ignition_system': range(300, 400),   # P0300 to P0399
@@ -127,3 +104,6 @@ def generate_engine_dtc_codes(num_codes=5):
         dtc_codes.append(code)
 
     return dtc_codes
+
+
+

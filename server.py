@@ -1,24 +1,40 @@
-from fastapi import FastAPI, HTTPException
-from typing import Dict
+from fastapi import FastAPI, HTTPException, Query
+from typing import Dict, Optional
 import pandas as pd
+import numpy as np
 from ast import literal_eval
 import vertexai
 from simulation_engine import game
-from vehicle_statistics import aggregate_statistics
+from vehicle_statistics import aggregate_statistics, load_vehicle_data, dtc_codes
 from vertexai.preview.generative_models import GenerativeModel
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from ast import literal_eval
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi import FastAPI, Request
-from vehicle_statistics import load_vehicle_data, aggregate_statistics, dtc_codes
+import logging
+import uuid
+import datetime
+import json
+import os
+from google.cloud import bigquery
+import config  # Import the config module
 
 app = FastAPI()
 
-app.mount("/assets", StaticFiles(directory="dist/assets"), name="assets")
+# Path to the original UI assets
+ORIGINAL_UI_DIR = "dist"
 
-origins = ["*"]
+# Mount original UI assets
+if os.path.exists(f"{ORIGINAL_UI_DIR}/assets"):
+    app.mount("/assets", StaticFiles(directory=f"{ORIGINAL_UI_DIR}/assets"), name="assets")
+
+# Only allow cross-origin requests from the React server
+origins = [
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -33,41 +49,195 @@ class Player(BaseModel):
 class ChatMessage(BaseModel):
     message: str
     player_id: str
-    
-import logging
 
 logging.basicConfig(level=logging.INFO)
 
-@app.get("/{path:path}")
-async def serve_ui(request: Request, path: str):
-    return FileResponse("dist/index.html")
-
 player_names = []
+
+# Add this custom JSON encoder class near the top of your file
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (np.integer, np.int64)):
+            return int(obj)
+        elif isinstance(obj, (np.floating, np.float64)):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NumpyEncoder, self).default(obj)
+
+# Helper function to convert numpy types in complex nested structures
+def convert_numpy_types(obj):
+    if isinstance(obj, dict):
+        return {k: convert_numpy_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    elif isinstance(obj, (np.integer, np.int64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float64)):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    else:
+        return obj
+
+# UI routing - serve original UI
+@app.get("/")
+@app.get("/{path:path}")
+async def serve_original_ui_routes(request: Request, path: str = ""):
+    """
+    Serve the original UI
+    """
+    return FileResponse(f"{ORIGINAL_UI_DIR}/index.html")
+
+def insert_with_uniqueness_check(table_id, row_data):
+    """
+    Insert data into BigQuery with uniqueness check for player_id and session_id
+    
+    Args:
+        table_id (str): Table name within the dataset
+        row_data (dict): Data to insert
+        
+    Returns:
+        bool: True if successful, False if record already exists
+    """
+    client = bigquery.Client()
+    
+    # Check if a record with the same player_id and session_id exists
+    query = f"""
+    SELECT COUNT(*) as count 
+    FROM `{config.PROJECT_ID}.{config.DATASET_ID}.{table_id}`
+    WHERE player_id = '{row_data["player_id"]}' AND session_id = '{row_data["session_id"]}'
+    """
+    
+    if "graph_type" in row_data and "title" in row_data:
+        # For visualization data, also check graph_type and title
+        query += f" AND graph_type = '{row_data['graph_type']}' AND title = '{row_data['title']}'"
+    
+    query_job = client.query(query)
+    result = list(query_job.result())[0]
+    
+    if result.count > 0:
+        # Record exists, handle accordingly (skip or update)
+        logging.info(f"Record already exists, skipping insert")
+        return False
+    else:
+        # Convert numpy types before inserting
+        converted_data = convert_numpy_types(row_data)
+        
+        # Insert new record
+        errors = client.insert_rows_json(
+            f"{config.PROJECT_ID}.{config.DATASET_ID}.{table_id}", 
+            [converted_data]
+        )
+        if errors:
+            logging.error(f"Error inserting data: {errors}")
+            return False
+        return True
 
 @app.post("/generate_summary/")
 async def generate_summary_endpoint(player: Player) -> Dict:
     player_id = str(player.player_id)
     try:
-        # Initialize Vertex AI
-        vertexai.init(project="fresh-span-400217", location="us-central1") 
-        model = GenerativeModel("gemini-1.0-pro-002")
+        # Generate a unique session ID for this run
+        session_id = str(uuid.uuid4())
+        session_timestamp = datetime.datetime.now()
         
+        # Initialize Vertex AI
+        vertexai.init(project=config.PROJECT_ID, location=config.LOCATION) 
+        model = GenerativeModel(config.SUMMARY_MODEL) 
+        
+        # THIS IS THE KEY PART: Still call the game function to run the BeamNG simulation
         logging.info(f"Calling game function with player_id: {player_id}")
-        game(player_id)
+        game(player_id)  # This launches BeamNG.drive and collects data
         
         player_names.append(player_id)
         
-        # Load data
+        # Load data from the CSV file generated by the simulation
         logging.info(f"Loading CSV file for player_id: {player_id}")
         df = pd.read_csv(f'telematics/{player_id}_vehicle_data.csv')
-
+        
+        # Add session metadata to the dataframe
+        df['session_id'] = session_id
+        df['session_timestamp'] = session_timestamp.isoformat()
+        
+        # Save the updated CSV
+        df.to_csv(f'telematics/{player_id}_vehicle_data.csv', index=False)
+        
+        # Upload raw telemetry data to BigQuery
+        client = bigquery.Client()
+        telemetry_table_id = f"{config.PROJECT_ID}.{config.DATASET_ID}.{player_id}_vehicle_data"
+        
+        telemetry_job_config = bigquery.LoadJobConfig(
+            source_format=bigquery.SourceFormat.CSV,
+            skip_leading_rows=1,
+            autodetect=True,
+        )
+        
+        with open(f'telematics/{player_id}_vehicle_data.csv', "rb") as source_file:
+            telemetry_load_job = client.load_table_from_file(
+                source_file, telemetry_table_id, job_config=telemetry_job_config
+            )
+        
+        telemetry_load_job.result()  # Wait for the job to complete
+        
         logging.info("Aggregating statistics")
         summary = aggregate_statistics(df)
-
-        # Generate content
+        summary = convert_numpy_types(summary)
+        
+        # STORE ANALYTICS SUMMARY IN BIGQUERY
+        # Convert the analytics summary to a format suitable for BigQuery
+        analytics_row = {
+            "player_id": player_id,
+            "session_id": session_id,
+            "session_timestamp": session_timestamp.isoformat(),
+            "total_time_secs": summary.get("Total Time (secs)"),
+            "accX_mean": summary.get("Acceleration X (mean)"),
+            "accY_mean": summary.get("Acceleration Y (mean)"),
+            "accZ_mean": summary.get("Acceleration Z (mean)"),
+            "brake_usage_count": summary.get("Brake Usage Count"),
+            "brake_average": summary.get("Brake Average"),
+            "fuel_start": summary.get("Fuel Start"),
+            "fuel_end": summary.get("Fuel End"),
+            "gears_used": json.dumps(summary.get("Gears Used", []), cls=NumpyEncoder),
+            "gear_change_details": json.dumps(summary.get("Gear Change Details", []), cls=NumpyEncoder),
+            "oil_temp_min": summary.get("Oil Temperature Stats", {}).get("min"),
+            "oil_temp_max": summary.get("Oil Temperature Stats", {}).get("max"),
+            "oil_temp_mean": summary.get("Oil Temperature Stats", {}).get("mean"),
+            "part_damage": json.dumps(summary.get("Part Damage", {}), cls=NumpyEncoder),
+            "rpm_min": summary.get("RPM Stats", {}).get("min"),
+            "rpm_max": summary.get("RPM Stats", {}).get("max"),
+            "rpm_mean": summary.get("RPM Stats", {}).get("mean"),
+            "steering_changes": summary.get("Steering Changes"),
+            "throttle_min": summary.get("Throttle Stats", {}).get("min"),
+            "throttle_max": summary.get("Throttle Stats", {}).get("max"),
+            "throttle_mean": summary.get("Throttle Stats", {}).get("mean"),
+            "water_temp_min": summary.get("Water Temperature Stats", {}).get("min"),
+            "water_temp_max": summary.get("Water Temperature Stats", {}).get("max"),
+            "water_temp_mean": summary.get("Water Temperature Stats", {}).get("mean"),
+            "wheel_speed_min": summary.get("Wheel Speed Stats", {}).get("min"),
+            "wheel_speed_max": summary.get("Wheel Speed Stats", {}).get("max"),
+            "wheel_speed_mean": summary.get("Wheel Speed Stats", {}).get("mean"),
+            "horn_usage_count": summary.get("Horn Usage Count")
+        }
+        
+        # Insert into analytics_summary table
+        analytics_table_id = "analytics_summary"
+        analytics_errors = insert_with_uniqueness_check(analytics_table_id, analytics_row)
+        
+        if analytics_errors:
+            logging.error(f"Error inserting analytics data: {analytics_errors}")
+        
+        # Generate AI content for performance summary
         logging.info("Generating content")
         responses = model.generate_content(
-            f"""{summary}\n\n Above are the statistics for the vehicle with player_id: {player_id}, Generate a summary and insights from the vehicle performance statistics obtained from a BeamNG.drive simulation driven by the player. The data reflects various performance metrics recorded on an automation test track. Given the statistics, provide insights and recommendations for the player to improve their driving skills and vehicle performance. The summary should be in a conversational format and should be easy to understand for the player. Round off the numbers to 2 decimal places use imperial units\n Be a Critic and a Coach. Provide constructive feedback and suggestions for improvement.""",
+            f"""{summary}\n\n Above are the statistics for the vehicle with player_id: {player_id}, 
+            Generate a summary and insights from the vehicle performance statistics obtained from a 
+            BeamNG.drive simulation driven by the player. The data reflects various performance 
+            metrics recorded on an automation test track. Given the statistics, provide insights 
+            and recommendations for the player to improve their driving skills and vehicle performance. 
+            The summary should be in a conversational format and should be easy to understand for the player. 
+            Round off the numbers to 2 decimal places use imperial units\n 
+            Be a Critic and a Coach. Provide constructive feedback and suggestions for improvement.""",
             generation_config={
                 "max_output_tokens": 2048,
                 "temperature": 0,
@@ -76,13 +246,23 @@ async def generate_summary_endpoint(player: Player) -> Dict:
             stream=False,
         )
         
-        fuel_data = [{'Time': row['Time'], 'Fuel Level': row['fuel']} for index, row in df.iterrows()]
-        oil_temp_data = [{'Time': row['Time'], 'Oil Temperature': row['oil_temperature']} for index, row in df.iterrows()]
-        water_temp_data = [{'Time': row['Time'], 'Water Temperature': row['water_temperature']} for index, row in df.iterrows()]
-        gear_distribution = df['gear'].value_counts().reset_index().rename(columns={'index': 'Gear', 'gear': 'Frequency'})
-        gear_distribution_data = [{'Gear': row['Gear'], 'Frequency': row['Frequency']} for index, row in gear_distribution.iterrows()]
+        # Prepare graph data for visualization
+        fuel_data = [{'Time': float(row['Time']), 'Fuel Level': float(row['fuel'])} for index, row in df.iterrows()]
+        oil_temp_data = [{'Time': float(row['Time']), 'Oil Temperature': float(row['oil_temperature'])} for index, row in df.iterrows()]
+        water_temp_data = [{'Time': float(row['Time']), 'Water Temperature': float(row['water_temperature'])} for index, row in df.iterrows()]
+        
+        # Create gear distribution data
+        gear_distribution = df['gear'].value_counts().reset_index()  
+        gear_distribution.columns = ['Gear', 'Frequency']  
+        gear_distribution_data = [{'Gear': int(row['Gear']), 'Frequency': int(row['Frequency'])} for index, row in gear_distribution.iterrows()]
+
+        # Convert part damage string to dictionary
         part_damage = literal_eval(df['part_damage'].iloc[-1])
-        steering = df['steering'].diff().abs().sum()
+        
+        # Create steering data
+        steering_data = [{'Time': float(row['Time']), 'Steering': float(row['steering'])} for index, row in df.iterrows()]
+        
+        # Compile visualization data
         graphs = [
             {
                 'graph_type': 'pie',
@@ -122,16 +302,37 @@ async def generate_summary_endpoint(player: Player) -> Dict:
                 'title': 'Steering Changes',
                 'x_axis': 'Time',
                 'y_axis': 'Steering',
-                'data': [{'Time': row['Time'], 'Steering': row['steering']} for index, row in df.iterrows()]
+                'data': steering_data
             }
         ]
         
-        df = pd.read_csv(f'telematics/{player.player_id}_vehicle_data.csv')
-        dtc_codes = df['DTC'].iloc[0]
-    
-        model = GenerativeModel("gemini-1.0-pro-002")
-        dtc_response = model.generate_content(
-            f"""{dtc_codes}\n\nBased on the above DTC codes, What could be the root cause of the problem? Also, provide the diagnostic steps and recommended fixes for the problem. Generate a detailed report. The report will identify potential root causes, provide a step-by-step diagnostic approach, and recommend solutions to resolve the issues.""",
+        # Store visualization data in BigQuery
+        visualization_table_id = "visualization_data"
+        
+        for graph in graphs:
+            visualization_row = {
+                "player_id": player_id,
+                "session_id": session_id,
+                "graph_type": graph['graph_type'],
+                "title": graph['title'],
+                "x_axis": graph.get('x_axis', ''),
+                "y_axis": graph.get('y_axis', ''),
+                "data": json.dumps(graph['data'], cls=NumpyEncoder)
+            }
+            vis_errors = insert_with_uniqueness_check(visualization_table_id, visualization_row)
+            if vis_errors:
+                logging.error(f"Error inserting visualization data: {vis_errors}")
+        
+        # Get DTC codes
+        dtc_codes_data = dtc_codes(df)
+        
+        # Generate DTC analysis
+        dtc_model = GenerativeModel(config.DTC_MODEL)
+        dtc_response = dtc_model.generate_content(
+            f"""{dtc_codes_data}\n\nBased on the above DTC codes, What could be the root cause of the problem? 
+            Also, provide the diagnostic steps and recommended fixes for the problem. Generate a detailed report. 
+            The report will identify potential root causes, provide a step-by-step diagnostic approach, 
+            and recommend solutions to resolve the issues.""",
             generation_config={
                 "max_output_tokens": 2048,
                 "temperature": 0,
@@ -139,13 +340,33 @@ async def generate_summary_endpoint(player: Player) -> Dict:
             },
             stream=False,
         )
-    
-   
-
-        return {"generated_text": responses.text, "player_id": player_id, "graphs": graphs, "dtc_response": dtc_response.text, "dtc_codes": dtc_codes}
-    
-    
-
+        
+        # Store AI analysis in BigQuery
+        ai_analysis_table_id = "ai_analysis"
+        ai_analysis_row = {
+            "player_id": player_id,
+            "session_id": session_id,
+            "session_timestamp": session_timestamp.isoformat(),
+            "performance_summary": responses.text,
+            "dtc_codes": dtc_codes_data,
+            "dtc_analysis": dtc_response.text,
+            "generation_timestamp": datetime.datetime.now().isoformat()
+        }
+        
+        ai_errors = insert_with_uniqueness_check(ai_analysis_table_id, ai_analysis_row)
+        if ai_errors:
+            logging.error(f"Error inserting AI analysis data: {ai_errors}")
+        
+        # Return the complete response
+        return {
+            "generated_text": responses.text,
+            "player_id": player_id,
+            "session_id": session_id,
+            "graphs": graphs,
+            "dtc_response": dtc_response.text,
+            "dtc_codes": dtc_codes_data,
+            "summary_stats": summary
+        }
     except Exception as e:
         logging.error(f"Error occurred: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -158,17 +379,18 @@ def multiturn_generate_content(chat_message: ChatMessage):
         player_id = player_names[-1]
         data = load_vehicle_data(player_id)
         stats = aggregate_statistics(data)
+        stats = convert_numpy_types(stats)
         dtc = dtc_codes(data)
 
         message = chat_message.message
-        model = GenerativeModel("gemini-1.0-pro-001")
+        model = GenerativeModel("gemini-2.0-flash-001")
         if player_id not in chat_sessions:
             chat_sessions[player_id] = model.start_chat(history=[])
         chat = chat_sessions[player_id]
 
         initial_message = f"""For the vehicle with player_id: {player_id}, the statistics are as follows:\n\n{stats}\n\n, The DTC codes are: {dtc}\n\nBased on the above statistics and DTC codes, Help user with their queries. Respond in Plain Text, Strictly No Markdown or HTML.
         """
-        print("initial_message", initial_message)
+        logging.info("Sending initial message to chat model")
 
         chat.send_message([initial_message])
 
@@ -182,11 +404,17 @@ def multiturn_generate_content(chat_message: ChatMessage):
             stream=False,
         )
 
-
         return {"response": response.text}
     
     else:
         return {"response": "Application was restarted. Please run the simulation again. Thank you for your patience.😊"}
-    
 
-# To run the server, execute the following command: uvicorn server:app --reload
+# API endpoint for checking server health
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy", "server": "original-backend"}
+
+if __name__ == "__main__":
+    import uvicorn
+    # Run this server on the original port
+    uvicorn.run(app, host="0.0.0.0", port=8000)

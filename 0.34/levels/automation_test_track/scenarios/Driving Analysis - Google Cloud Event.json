@@ -1,0 +1,1 @@
+[{"difficulty":0,"name":"Vehicle Driving Analysis - Google Cloud Next 25","lapConfig":{},"forceNoCountDown":true,"authors":"BeamNGpy","vehicles":{"Vehicle":{"startFocus":true,"playerUsable":true}},"prefabs":["levels/automation_test_track/scenarios/Driving Analysis - Google Cloud Event.prefab.json"]}]

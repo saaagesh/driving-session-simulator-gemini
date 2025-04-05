@@ -1,0 +1,608 @@
+2025-04-03 19:35:33,268 - root - INFO - Calling game function with player_id: thu3
+2025-04-03 19:35:40,315 - beamngpy.BeamNGpy - INFO - Opening BeamNGpy instance.
+2025-04-03 19:35:40,316 - beamngpy.BeamNGpy - DEBUG - Determined BeamNG.* binary to be: C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe
+2025-04-03 19:35:40,327 - beamngpy.BeamNGpy - DEBUG - Created system call for starting BeamNG process: `C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe -nosteam -console -tcom-listen-ip 127.0.0.1 -lua extensions.load('tech/techCore');tech_techCore.openServer(60152) -userpath C:\Users\Public\drive-session-summarizer`
+2025-04-03 19:35:40,510 - beamngpy.BeamNGpy - INFO - Started BeamNG.
+2025-04-03 19:35:50,510 - beamngpy.BeamNGpy - INFO - Connecting to BeamNG.tech at: (localhost, 60152)
+2025-04-03 19:35:51,972 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 19:35:51,972 - beamngpy.BeamNGpy - INFO - BeamNGpy successfully connected to BeamNG.
+2025-04-03 19:35:52,220 - beamngpy.Scenario - DEBUG - Added vehicle with id 'Vehicle'.
+2025-04-03 19:35:52,220 - beamngpy.Scenario - DEBUG - No BeamNGpy instance available. Did not spawn vehicle with id 'Vehicle'.
+2025-04-03 19:35:52,235 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 1 vehicles: Vehicle
+2025-04-03 19:35:52,235 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific roads.
+2025-04-03 19:35:52,236 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific mesh roads.
+2025-04-03 19:35:52,236 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 objects of type `beamngpy.ScenarioObject`
+2025-04-03 19:35:52,236 - beamngpy.Scenario - DEBUG - Generated prefab:
+{ "name": "Vehicle", "class": "BeamNGVehicle", "persistentId": "698143a2-69a7-43c9-b6a1-b9d39032d7e8", "__parent": "Vehicle Driving Analysis - Google Cloud Next 25_group", "position": [497.1917725, 178.2896118, 131.7432404], "color": [1.0, 0.0, 0.0, 0.0], "colorPalette0": [1.0, 0.0, 0.0, 0.0], "colorPalette1": [1.0, 0.0, 0.0, 0.0], "dataBlock": "default_vehicle", "jBeam": "bolide", "licenseText": "thu3", "rotationMatrix": [0.029536891397992093, -0.9995631748732619, 0.0010156199231013381, 0.9995501062635477, 0.029531177460473956, -0.0052435318563667285, 0.0052112488977175166, 0.0011700406330427343, 0.9999857368432027], "autoEnterVehicle": false}
+{ "name": "Vehicle Driving Analysis - Google Cloud Next 25_group", "class": "SimGroup", "persistentId": "4de573fb-f1cd-459b-9bb2-fd926011a12f", "groupPosition": "0.000000 0.000000 0.000000"}
+
+2025-04-03 19:35:52,237 - beamngpy.Scenario - DEBUG - Generated scenarios info dict:
+{'name': 'Vehicle Driving Analysis - Google Cloud Next 25', 'description': None, 'difficulty': 0, 'authors': 'BeamNGpy', 'lapConfig': [], 'forceNoCountDown': True, 'vehicles': {'Vehicle': {'playerUsable': True, 'startFocus': True}}, 'prefabs': ['levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.prefab.json']}
+
+2025-04-03 19:35:52,237 - beamngpy.BeamNGpy - DEBUG - Sending message of type CreateScenario to BeamNG.tech's engine in blocking mode.
+2025-04-03 19:35:52,331 - beamngpy.BeamNGpy - DEBUG - Got response for message of type CreateScenario.
+2025-04-03 19:36:08,897 - beamngpy.BeamNGpy - INFO - Loaded map.
+2025-04-03 19:36:08,897 - beamngpy.Scenario - DEBUG - 0 procedural meshes.
+2025-04-03 19:36:08,898 - beamngpy.BeamNGpy - DEBUG - Sending message of type GetCurrentVehicles to BeamNG.tech's engine in blocking mode.
+2025-04-03 19:36:11,895 - beamngpy.BeamNGpy - DEBUG - Got response for message of type GetCurrentVehicles.
+2025-04-03 19:36:11,911 - beamngpy.Scenario - DEBUG - Got 1 vehicles from scenario.
+2025-04-03 19:36:11,930 - beamngpy.Scenario - DEBUG - Connecting to 1 vehicles.
+2025-04-03 19:36:12,630 - beamngpy.Vehicle - DEBUG - Created new vehicle connection on port 61527
+2025-04-03 19:36:12,630 - beamngpy.Vehicle - INFO - Vehicle Vehicle connected to simulation.
+2025-04-03 19:36:12,631 - beamngpy.BeamNGpy - INFO - Attempting to connect to vehicle Vehicle
+2025-04-03 19:36:15,688 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 19:36:15,688 - beamngpy.BeamNGpy - INFO - Successfully connected to vehicle Vehicle.
+2025-04-03 19:36:15,690 - beamngpy.Scenario - INFO - Connected to scenario: Vehicle Driving Analysis - Google Cloud Next 25
+2025-04-03 19:36:15,779 - beamngpy.BeamNGpy - INFO - Starting scenario.
+2025-04-03 19:36:15,816 - beamngpy.BeamNGpy - INFO - Pausing the simulation.
+2025-04-03 19:36:25,023 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 240 steps.
+2025-04-03 19:36:26,285 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:36:27,535 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:36:28,775 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:36:30,109 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:36:31,388 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:36:32,669 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:36:32,670 - beamngpy.BeamNGpy - INFO - Closing BeamNGpy instance.
+2025-04-03 19:36:32,670 - beamngpy.Vehicle - INFO - Disconnected from vehicle Vehicle and detached sensors.
+2025-04-03 19:36:32,670 - beamngpy.Scenario - DEBUG - Removed beamngpy instance from scenario class.
+2025-04-03 19:36:32,671 - beamngpy.BeamNGpy - INFO - Terminating BeamNG.tech process.
+2025-04-03 19:36:38,305 - root - INFO - Loading CSV file for player_id: thu3
+2025-04-03 19:36:41,505 - root - INFO - Aggregating statistics
+2025-04-03 19:36:41,512 - root - INFO - Inserting data into analytics_summary for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:36:42,892 - root - INFO - Successfully inserted new record into analytics_summary
+2025-04-03 19:36:42,893 - root - ERROR - Error inserting analytics data: True
+2025-04-03 19:36:42,893 - root - INFO - Generating performance summary for player_id: thu3, session_id: a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:02,070 - root - ERROR - Generated performance summary is empty!
+2025-04-03 19:37:02,072 - root - INFO - Inserting data into visualization_data for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:03,446 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:37:03,447 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:37:03,447 - root - INFO - Inserting data into visualization_data for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:04,580 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:37:04,581 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:37:04,581 - root - INFO - Inserting data into visualization_data for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:05,813 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:37:05,813 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:37:05,814 - root - INFO - Inserting data into visualization_data for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:07,090 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:37:07,090 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:37:07,091 - root - INFO - Inserting data into visualization_data for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:08,292 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:37:08,293 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:37:08,293 - root - INFO - Inserting data into visualization_data for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:09,508 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:37:09,508 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:37:20,742 - root - INFO - Inserting AI analysis into BigQuery table 'ai_analysis'
+2025-04-03 19:37:20,743 - root - INFO - Performance summary length: 0
+2025-04-03 19:37:20,743 - root - INFO - DTC analysis length: 8706
+2025-04-03 19:37:20,744 - root - INFO - Inserting data into ai_analysis for player thu3, session a8692e84-9923-4b97-93b0-0f773874e27c
+2025-04-03 19:37:21,889 - root - INFO - Inserting new AI analysis with performance_summary length: 0, dtc_analysis length: 8706
+2025-04-03 19:37:22,102 - root - INFO - Successfully inserted new record into ai_analysis
+2025-04-03 19:37:22,102 - root - ERROR - Error inserting AI analysis data: True
+2025-04-03 19:49:25,988 - root - INFO - Calling game function with player_id: thu4
+2025-04-03 19:49:33,029 - beamngpy.BeamNGpy - INFO - Opening BeamNGpy instance.
+2025-04-03 19:49:33,031 - beamngpy.BeamNGpy - DEBUG - Determined BeamNG.* binary to be: C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe
+2025-04-03 19:49:33,032 - beamngpy.BeamNGpy - DEBUG - Created system call for starting BeamNG process: `C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe -nosteam -console -tcom-listen-ip 127.0.0.1 -lua extensions.load('tech/techCore');tech_techCore.openServer(60152) -userpath C:\Users\Public\drive-session-summarizer`
+2025-04-03 19:49:33,217 - beamngpy.BeamNGpy - INFO - Started BeamNG.
+2025-04-03 19:49:43,220 - beamngpy.BeamNGpy - INFO - Connecting to BeamNG.tech at: (localhost, 60152)
+2025-04-03 19:49:43,516 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 19:49:43,516 - beamngpy.BeamNGpy - INFO - BeamNGpy successfully connected to BeamNG.
+2025-04-03 19:49:43,744 - beamngpy.Scenario - DEBUG - Added vehicle with id 'Vehicle'.
+2025-04-03 19:49:43,744 - beamngpy.Scenario - DEBUG - No BeamNGpy instance available. Did not spawn vehicle with id 'Vehicle'.
+2025-04-03 19:49:43,759 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 1 vehicles: Vehicle
+2025-04-03 19:49:43,759 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific roads.
+2025-04-03 19:49:43,759 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific mesh roads.
+2025-04-03 19:49:43,760 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 objects of type `beamngpy.ScenarioObject`
+2025-04-03 19:49:43,760 - beamngpy.Scenario - DEBUG - Generated prefab:
+{ "name": "Vehicle", "class": "BeamNGVehicle", "persistentId": "698143a2-69a7-43c9-b6a1-b9d39032d7e8", "__parent": "Vehicle Driving Analysis - Google Cloud Next 25_group", "position": [497.1917725, 178.2896118, 131.7432404], "color": [1.0, 0.0, 0.0, 0.0], "colorPalette0": [1.0, 0.0, 0.0, 0.0], "colorPalette1": [1.0, 0.0, 0.0, 0.0], "dataBlock": "default_vehicle", "jBeam": "bolide", "licenseText": "thu4", "rotationMatrix": [0.029536891397992093, -0.9995631748732619, 0.0010156199231013381, 0.9995501062635477, 0.029531177460473956, -0.0052435318563667285, 0.0052112488977175166, 0.0011700406330427343, 0.9999857368432027], "autoEnterVehicle": false}
+{ "name": "Vehicle Driving Analysis - Google Cloud Next 25_group", "class": "SimGroup", "persistentId": "4de573fb-f1cd-459b-9bb2-fd926011a12f", "groupPosition": "0.000000 0.000000 0.000000"}
+
+2025-04-03 19:49:43,760 - beamngpy.Scenario - DEBUG - Generated scenarios info dict:
+{'name': 'Vehicle Driving Analysis - Google Cloud Next 25', 'description': None, 'difficulty': 0, 'authors': 'BeamNGpy', 'lapConfig': [], 'forceNoCountDown': True, 'vehicles': {'Vehicle': {'playerUsable': True, 'startFocus': True}}, 'prefabs': ['levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.prefab.json']}
+
+2025-04-03 19:49:43,761 - beamngpy.BeamNGpy - DEBUG - Sending message of type CreateScenario to BeamNG.tech's engine in blocking mode.
+2025-04-03 19:49:43,857 - beamngpy.BeamNGpy - DEBUG - Got response for message of type CreateScenario.
+2025-04-03 19:50:02,359 - beamngpy.BeamNGpy - INFO - Loaded map.
+2025-04-03 19:50:02,359 - beamngpy.Scenario - DEBUG - 0 procedural meshes.
+2025-04-03 19:50:02,359 - beamngpy.BeamNGpy - DEBUG - Sending message of type GetCurrentVehicles to BeamNG.tech's engine in blocking mode.
+2025-04-03 19:50:05,746 - beamngpy.BeamNGpy - DEBUG - Got response for message of type GetCurrentVehicles.
+2025-04-03 19:50:05,764 - beamngpy.Scenario - DEBUG - Got 1 vehicles from scenario.
+2025-04-03 19:50:05,918 - beamngpy.Scenario - DEBUG - Connecting to 1 vehicles.
+2025-04-03 19:50:06,665 - beamngpy.Vehicle - DEBUG - Created new vehicle connection on port 50217
+2025-04-03 19:50:06,665 - beamngpy.Vehicle - INFO - Vehicle Vehicle connected to simulation.
+2025-04-03 19:50:06,666 - beamngpy.BeamNGpy - INFO - Attempting to connect to vehicle Vehicle
+2025-04-03 19:50:09,278 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 19:50:09,278 - beamngpy.BeamNGpy - INFO - Successfully connected to vehicle Vehicle.
+2025-04-03 19:50:09,280 - beamngpy.Scenario - INFO - Connected to scenario: Vehicle Driving Analysis - Google Cloud Next 25
+2025-04-03 19:50:09,369 - beamngpy.BeamNGpy - INFO - Starting scenario.
+2025-04-03 19:50:09,413 - beamngpy.BeamNGpy - INFO - Pausing the simulation.
+2025-04-03 19:50:18,543 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 240 steps.
+2025-04-03 19:50:20,047 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:50:21,760 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:50:23,287 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:50:24,788 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:50:26,336 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:50:27,816 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 19:50:27,816 - beamngpy.BeamNGpy - INFO - Closing BeamNGpy instance.
+2025-04-03 19:50:27,817 - beamngpy.Vehicle - INFO - Disconnected from vehicle Vehicle and detached sensors.
+2025-04-03 19:50:27,817 - beamngpy.Scenario - DEBUG - Removed beamngpy instance from scenario class.
+2025-04-03 19:50:27,817 - beamngpy.BeamNGpy - INFO - Terminating BeamNG.tech process.
+2025-04-03 19:50:32,830 - root - INFO - Loading CSV file for player_id: thu4
+2025-04-03 19:50:36,294 - root - INFO - Aggregating statistics
+2025-04-03 19:50:36,305 - root - INFO - Inserting data into analytics_summary for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:50:37,696 - root - INFO - Successfully inserted new record into analytics_summary
+2025-04-03 19:50:37,697 - root - ERROR - Error inserting analytics data: True
+2025-04-03 19:50:37,697 - root - INFO - Generating performance summary for player_id: thu4, session_id: b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:50:56,489 - root - ERROR - Generated performance summary is empty!
+2025-04-03 19:50:56,493 - root - INFO - Inserting data into visualization_data for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:50:57,849 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:50:57,850 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:50:57,850 - root - INFO - Inserting data into visualization_data for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:50:59,063 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:50:59,064 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:50:59,064 - root - INFO - Inserting data into visualization_data for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:51:00,258 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:51:00,259 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:51:00,259 - root - INFO - Inserting data into visualization_data for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:51:01,608 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:51:01,609 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:51:01,609 - root - INFO - Inserting data into visualization_data for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:51:02,658 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:51:02,658 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:51:02,659 - root - INFO - Inserting data into visualization_data for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:51:03,880 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 19:51:03,880 - root - ERROR - Error inserting visualization data: True
+2025-04-03 19:51:15,485 - root - INFO - Inserting AI analysis into BigQuery table 'ai_analysis'
+2025-04-03 19:51:15,486 - root - INFO - Performance summary length: 0
+2025-04-03 19:51:15,486 - root - INFO - DTC analysis length: 8525
+2025-04-03 19:51:15,486 - root - INFO - Inserting data into ai_analysis for player thu4, session b06595e8-ff33-42af-bdc1-b1df9295d1ac
+2025-04-03 19:51:16,761 - root - INFO - Inserting new AI analysis with performance_summary length: 0, dtc_analysis length: 8525
+2025-04-03 19:51:16,939 - root - INFO - Successfully inserted new record into ai_analysis
+2025-04-03 19:51:16,939 - root - ERROR - Error inserting AI analysis data: True
+2025-04-03 20:01:00,900 - root - INFO - Calling game function with player_id: thu6
+2025-04-03 20:01:07,936 - beamngpy.BeamNGpy - INFO - Opening BeamNGpy instance.
+2025-04-03 20:01:07,937 - beamngpy.BeamNGpy - DEBUG - Determined BeamNG.* binary to be: C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe
+2025-04-03 20:01:07,937 - beamngpy.BeamNGpy - DEBUG - Created system call for starting BeamNG process: `C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe -nosteam -console -tcom-listen-ip 127.0.0.1 -lua extensions.load('tech/techCore');tech_techCore.openServer(60152) -userpath C:\Users\Public\drive-session-summarizer`
+2025-04-03 20:01:08,161 - beamngpy.BeamNGpy - INFO - Started BeamNG.
+2025-04-03 20:01:18,158 - beamngpy.BeamNGpy - INFO - Connecting to BeamNG.tech at: (localhost, 60152)
+2025-04-03 20:01:20,728 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 20:01:20,728 - beamngpy.BeamNGpy - INFO - BeamNGpy successfully connected to BeamNG.
+2025-04-03 20:01:20,947 - beamngpy.Scenario - DEBUG - Added vehicle with id 'Vehicle'.
+2025-04-03 20:01:20,947 - beamngpy.Scenario - DEBUG - No BeamNGpy instance available. Did not spawn vehicle with id 'Vehicle'.
+2025-04-03 20:01:20,974 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 1 vehicles: Vehicle
+2025-04-03 20:01:20,975 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific roads.
+2025-04-03 20:01:20,975 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific mesh roads.
+2025-04-03 20:01:20,975 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 objects of type `beamngpy.ScenarioObject`
+2025-04-03 20:01:20,976 - beamngpy.Scenario - DEBUG - Generated prefab:
+{ "name": "Vehicle", "class": "BeamNGVehicle", "persistentId": "698143a2-69a7-43c9-b6a1-b9d39032d7e8", "__parent": "Vehicle Driving Analysis - Google Cloud Next 25_group", "position": [497.1917725, 178.2896118, 131.7432404], "color": [1.0, 0.0, 0.0, 0.0], "colorPalette0": [1.0, 0.0, 0.0, 0.0], "colorPalette1": [1.0, 0.0, 0.0, 0.0], "dataBlock": "default_vehicle", "jBeam": "bolide", "licenseText": "thu6", "rotationMatrix": [0.029536891397992093, -0.9995631748732619, 0.0010156199231013381, 0.9995501062635477, 0.029531177460473956, -0.0052435318563667285, 0.0052112488977175166, 0.0011700406330427343, 0.9999857368432027], "autoEnterVehicle": false}
+{ "name": "Vehicle Driving Analysis - Google Cloud Next 25_group", "class": "SimGroup", "persistentId": "4de573fb-f1cd-459b-9bb2-fd926011a12f", "groupPosition": "0.000000 0.000000 0.000000"}
+
+2025-04-03 20:01:20,976 - beamngpy.Scenario - DEBUG - Generated scenarios info dict:
+{'name': 'Vehicle Driving Analysis - Google Cloud Next 25', 'description': None, 'difficulty': 0, 'authors': 'BeamNGpy', 'lapConfig': [], 'forceNoCountDown': True, 'vehicles': {'Vehicle': {'playerUsable': True, 'startFocus': True}}, 'prefabs': ['levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.prefab.json']}
+
+2025-04-03 20:01:20,977 - beamngpy.BeamNGpy - DEBUG - Sending message of type CreateScenario to BeamNG.tech's engine in blocking mode.
+2025-04-03 20:01:21,134 - beamngpy.BeamNGpy - DEBUG - Got response for message of type CreateScenario.
+2025-04-03 20:01:39,555 - beamngpy.BeamNGpy - INFO - Loaded map.
+2025-04-03 20:01:39,555 - beamngpy.Scenario - DEBUG - 0 procedural meshes.
+2025-04-03 20:01:39,555 - beamngpy.BeamNGpy - DEBUG - Sending message of type GetCurrentVehicles to BeamNG.tech's engine in blocking mode.
+2025-04-03 20:01:42,588 - beamngpy.BeamNGpy - DEBUG - Got response for message of type GetCurrentVehicles.
+2025-04-03 20:01:42,605 - beamngpy.Scenario - DEBUG - Got 1 vehicles from scenario.
+2025-04-03 20:01:42,704 - beamngpy.Scenario - DEBUG - Connecting to 1 vehicles.
+2025-04-03 20:01:43,334 - beamngpy.Vehicle - DEBUG - Created new vehicle connection on port 55783
+2025-04-03 20:01:43,334 - beamngpy.Vehicle - INFO - Vehicle Vehicle connected to simulation.
+2025-04-03 20:01:43,334 - beamngpy.BeamNGpy - INFO - Attempting to connect to vehicle Vehicle
+2025-04-03 20:01:46,117 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 20:01:46,117 - beamngpy.BeamNGpy - INFO - Successfully connected to vehicle Vehicle.
+2025-04-03 20:01:46,121 - beamngpy.Scenario - INFO - Connected to scenario: Vehicle Driving Analysis - Google Cloud Next 25
+2025-04-03 20:01:46,231 - beamngpy.BeamNGpy - INFO - Starting scenario.
+2025-04-03 20:01:46,267 - beamngpy.BeamNGpy - INFO - Pausing the simulation.
+2025-04-03 20:01:55,813 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 240 steps.
+2025-04-03 20:01:57,013 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:01:58,245 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:01:59,590 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:02:00,945 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:02:02,288 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:02:03,631 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:02:03,631 - beamngpy.BeamNGpy - INFO - Closing BeamNGpy instance.
+2025-04-03 20:02:03,632 - beamngpy.Vehicle - INFO - Disconnected from vehicle Vehicle and detached sensors.
+2025-04-03 20:02:03,632 - beamngpy.Scenario - DEBUG - Removed beamngpy instance from scenario class.
+2025-04-03 20:02:03,633 - beamngpy.BeamNGpy - INFO - Terminating BeamNG.tech process.
+2025-04-03 20:02:10,028 - root - INFO - Loading CSV file for player_id: thu6
+2025-04-03 20:02:15,435 - root - INFO - Aggregating statistics
+2025-04-03 20:02:15,450 - root - INFO - Inserting data into analytics_summary for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:16,995 - root - INFO - Successfully inserted new record into analytics_summary
+2025-04-03 20:02:16,996 - root - ERROR - Error inserting analytics data: True
+2025-04-03 20:02:16,996 - root - INFO - Generating performance summary for player_id: thu6, session_id: a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:16,997 - root - INFO - Using model: gemini-2.5-pro-exp-03-25
+2025-04-03 20:02:16,997 - root - INFO - Prompt for performance summary (preview):
+2025-04-03 20:02:16,997 - root - INFO - 
+        Here are the vehicle performance statistics for player_id: thu6:
+
+        {
+  "Total Time (secs)": 2.5,
+  "Acceleration X (mean)": -0.14213108045796188,
+  "Acceleration Y (mean)": -1.4092197641048383,
+  "Acceleration Z (mean)": -9.58509018507013,
+  "Brake Usage Count": 0,
+  "Brake Average": 0.2084166674564282,
+  "Fuel Start": 0.9969657726765052,
+  "Fuel End": 0.9979981242651657,
+  "Gears Used": [
+    -1.0
+  ],
+  "Gear Change Details": [
+    [
+      0.0,
+      -1.0
+    ]
+  ],
+  "Oil Temp...
+2025-04-03 20:02:18,063 - root - INFO - GenAI client initialized for project: data-connect-demo4
+2025-04-03 20:02:18,064 - root - INFO - Generation config: Temperature=0.0, Max tokens=2048
+2025-04-03 20:02:18,065 - root - INFO - Sending request to model: gemini-2.5-pro-exp-03-25
+2025-04-03 20:02:18,065 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-04-03 20:02:37,103 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/data-connect-demo4/locations/us-central1/publishers/google/models/gemini-2.5-pro-exp-03-25:generateContent "HTTP/1.1 200 OK"
+2025-04-03 20:02:37,107 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-04-03 20:02:37,107 - root - INFO - GenAI request completed in 19.04 seconds
+2025-04-03 20:02:37,107 - root - INFO - Successfully generated summary. Length: 413 characters
+2025-04-03 20:02:37,107 - root - INFO - Summary preview: Okay, thu6, let's take a look at the telemetry from your recent 2.5-second run on the automation test track in BeamNG.drive. It was... eventful! Here's a breakdown of what the data tells us:
+
+**The Good:**
+
+*   **Engine Ready:** Your oil and water temperatures were in a healthy operating range (arou...
+2025-04-03 20:02:37,112 - root - INFO - Inserting data into visualization_data for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:38,524 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:02:38,525 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:02:38,525 - root - INFO - Inserting data into visualization_data for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:39,787 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:02:39,787 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:02:39,787 - root - INFO - Inserting data into visualization_data for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:41,677 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:02:41,677 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:02:41,677 - root - INFO - Inserting data into visualization_data for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:42,950 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:02:42,950 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:02:42,950 - root - INFO - Inserting data into visualization_data for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:44,257 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:02:44,258 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:02:44,258 - root - INFO - Inserting data into visualization_data for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:45,597 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:02:45,598 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:02:56,854 - root - INFO - Inserting AI analysis into BigQuery table 'ai_analysis'
+2025-04-03 20:02:56,854 - root - INFO - Performance summary length: 413
+2025-04-03 20:02:56,855 - root - INFO - DTC analysis length: 8598
+2025-04-03 20:02:56,855 - root - INFO - Inserting data into ai_analysis for player thu6, session a63983b6-a8de-46a4-bf42-95139e9523cb
+2025-04-03 20:02:58,020 - root - INFO - Inserting new AI analysis with performance_summary length: 413, dtc_analysis length: 8598
+2025-04-03 20:02:58,171 - root - INFO - Successfully inserted new record into ai_analysis
+2025-04-03 20:02:58,172 - root - ERROR - Error inserting AI analysis data: True
+2025-04-03 20:10:05,281 - root - INFO - Calling game function with player_id: thu7
+2025-04-03 20:10:12,326 - beamngpy.BeamNGpy - INFO - Opening BeamNGpy instance.
+2025-04-03 20:10:12,327 - beamngpy.BeamNGpy - DEBUG - Determined BeamNG.* binary to be: C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe
+2025-04-03 20:10:12,327 - beamngpy.BeamNGpy - DEBUG - Created system call for starting BeamNG process: `C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe -nosteam -console -tcom-listen-ip 127.0.0.1 -lua extensions.load('tech/techCore');tech_techCore.openServer(60152) -userpath C:\Users\Public\drive-session-summarizer`
+2025-04-03 20:10:12,517 - beamngpy.BeamNGpy - INFO - Started BeamNG.
+2025-04-03 20:10:22,518 - beamngpy.BeamNGpy - INFO - Connecting to BeamNG.tech at: (localhost, 60152)
+2025-04-03 20:10:23,306 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 20:10:23,307 - beamngpy.BeamNGpy - INFO - BeamNGpy successfully connected to BeamNG.
+2025-04-03 20:10:23,973 - beamngpy.Scenario - DEBUG - Added vehicle with id 'Vehicle'.
+2025-04-03 20:10:23,973 - beamngpy.Scenario - DEBUG - No BeamNGpy instance available. Did not spawn vehicle with id 'Vehicle'.
+2025-04-03 20:10:23,974 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 1 vehicles: Vehicle
+2025-04-03 20:10:23,975 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific roads.
+2025-04-03 20:10:23,975 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific mesh roads.
+2025-04-03 20:10:23,975 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 objects of type `beamngpy.ScenarioObject`
+2025-04-03 20:10:23,975 - beamngpy.Scenario - DEBUG - Generated prefab:
+{ "name": "Vehicle", "class": "BeamNGVehicle", "persistentId": "698143a2-69a7-43c9-b6a1-b9d39032d7e8", "__parent": "Vehicle Driving Analysis - Google Cloud Next 25_group", "position": [497.1917725, 178.2896118, 131.7432404], "color": [1.0, 0.0, 0.0, 0.0], "colorPalette0": [1.0, 0.0, 0.0, 0.0], "colorPalette1": [1.0, 0.0, 0.0, 0.0], "dataBlock": "default_vehicle", "jBeam": "bolide", "licenseText": "thu7", "rotationMatrix": [0.029536891397992093, -0.9995631748732619, 0.0010156199231013381, 0.9995501062635477, 0.029531177460473956, -0.0052435318563667285, 0.0052112488977175166, 0.0011700406330427343, 0.9999857368432027], "autoEnterVehicle": false}
+{ "name": "Vehicle Driving Analysis - Google Cloud Next 25_group", "class": "SimGroup", "persistentId": "4de573fb-f1cd-459b-9bb2-fd926011a12f", "groupPosition": "0.000000 0.000000 0.000000"}
+
+2025-04-03 20:10:23,976 - beamngpy.Scenario - DEBUG - Generated scenarios info dict:
+{'name': 'Vehicle Driving Analysis - Google Cloud Next 25', 'description': None, 'difficulty': 0, 'authors': 'BeamNGpy', 'lapConfig': [], 'forceNoCountDown': True, 'vehicles': {'Vehicle': {'playerUsable': True, 'startFocus': True}}, 'prefabs': ['levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.prefab.json']}
+
+2025-04-03 20:10:23,976 - beamngpy.BeamNGpy - DEBUG - Sending message of type CreateScenario to BeamNG.tech's engine in blocking mode.
+2025-04-03 20:10:24,252 - beamngpy.BeamNGpy - DEBUG - Got response for message of type CreateScenario.
+2025-04-03 20:10:39,575 - beamngpy.BeamNGpy - INFO - Loaded map.
+2025-04-03 20:10:39,576 - beamngpy.Scenario - DEBUG - 0 procedural meshes.
+2025-04-03 20:10:39,576 - beamngpy.BeamNGpy - DEBUG - Sending message of type GetCurrentVehicles to BeamNG.tech's engine in blocking mode.
+2025-04-03 20:10:42,709 - beamngpy.BeamNGpy - DEBUG - Got response for message of type GetCurrentVehicles.
+2025-04-03 20:10:42,725 - beamngpy.Scenario - DEBUG - Got 1 vehicles from scenario.
+2025-04-03 20:10:42,857 - beamngpy.Scenario - DEBUG - Connecting to 1 vehicles.
+2025-04-03 20:10:43,069 - beamngpy.Vehicle - DEBUG - Created new vehicle connection on port 58758
+2025-04-03 20:10:43,070 - beamngpy.Vehicle - INFO - Vehicle Vehicle connected to simulation.
+2025-04-03 20:10:43,070 - beamngpy.BeamNGpy - INFO - Attempting to connect to vehicle Vehicle
+2025-04-03 20:10:45,963 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 20:10:45,963 - beamngpy.BeamNGpy - INFO - Successfully connected to vehicle Vehicle.
+2025-04-03 20:10:45,965 - beamngpy.Scenario - INFO - Connected to scenario: Vehicle Driving Analysis - Google Cloud Next 25
+2025-04-03 20:10:46,065 - beamngpy.BeamNGpy - INFO - Starting scenario.
+2025-04-03 20:10:46,102 - beamngpy.BeamNGpy - INFO - Pausing the simulation.
+2025-04-03 20:10:56,228 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 240 steps.
+2025-04-03 20:10:57,649 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:10:59,023 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:11:00,320 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:11:01,603 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:11:02,955 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:11:04,176 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:11:04,176 - beamngpy.BeamNGpy - INFO - Closing BeamNGpy instance.
+2025-04-03 20:11:04,176 - beamngpy.Vehicle - INFO - Disconnected from vehicle Vehicle and detached sensors.
+2025-04-03 20:11:04,177 - beamngpy.Scenario - DEBUG - Removed beamngpy instance from scenario class.
+2025-04-03 20:11:04,177 - beamngpy.BeamNGpy - INFO - Terminating BeamNG.tech process.
+2025-04-03 20:11:09,103 - root - INFO - Loading CSV file for player_id: thu7
+2025-04-03 20:11:14,472 - root - INFO - Aggregating statistics
+2025-04-03 20:11:14,479 - root - INFO - Inserting data into analytics_summary for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:15,795 - root - INFO - Successfully inserted new record into analytics_summary
+2025-04-03 20:11:15,796 - root - ERROR - Error inserting analytics data: True
+2025-04-03 20:11:15,796 - root - INFO - Generating performance summary for player_id: thu7, session_id: c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:15,796 - root - INFO - Using model: gemini-2.5-pro-exp-03-25
+2025-04-03 20:11:15,797 - root - INFO - Prompt for performance summary (preview):
+2025-04-03 20:11:15,797 - root - INFO - 
+        Here are the vehicle performance statistics for player_id: thu7:
+
+        {
+  "Total Time (secs)": 2.5,
+  "Acceleration X (mean)": 0.010253939862047335,
+  "Acceleration Y (mean)": -0.9067382632483115,
+  "Acceleration Z (mean)": -9.676196368434644,
+  "Brake Usage Count": 1,
+  "Brake Average": 0.3833333333333333,
+  "Fuel Start": 0.9969118054864634,
+  "Fuel End": 0.998289595754185,
+  "Gears Used": [
+    1.0
+  ],
+  "Gear Change Details": [
+    [
+      0.0,
+      1.0
+    ]
+  ],
+  "Oil Temper...
+2025-04-03 20:11:16,430 - root - INFO - GenAI client initialized for project: data-connect-demo4
+2025-04-03 20:11:16,430 - root - INFO - Generation config: Temperature=0.0, Max tokens=2048
+2025-04-03 20:11:16,430 - root - INFO - Sending request to model: gemini-2.5-pro-exp-03-25
+2025-04-03 20:11:16,431 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-04-03 20:11:35,891 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/data-connect-demo4/locations/us-central1/publishers/google/models/gemini-2.5-pro-exp-03-25:generateContent "HTTP/1.1 200 OK"
+2025-04-03 20:11:35,894 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-04-03 20:11:35,894 - root - INFO - GenAI request completed in 19.46 seconds
+2025-04-03 20:11:35,895 - root - INFO - Successfully generated summary. Length: 861 characters
+2025-04-03 20:11:35,895 - root - INFO - Summary preview: Okay, thu7, let's take a look at your driving data from that quick run on the automation test track. It was a very short session, only 2.5 seconds, but even that tells a story! Here's the breakdown:
+
+**The Good:**
+
+*   **Quick Off the Line (Intent):** You definitely weren't shy with the throttle! Hi...
+2025-04-03 20:11:35,900 - root - INFO - Inserting data into visualization_data for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:37,117 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:11:37,117 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:11:37,118 - root - INFO - Inserting data into visualization_data for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:38,365 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:11:38,366 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:11:38,366 - root - INFO - Inserting data into visualization_data for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:39,598 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:11:39,599 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:11:39,599 - root - INFO - Inserting data into visualization_data for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:40,813 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:11:40,814 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:11:40,815 - root - INFO - Inserting data into visualization_data for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:42,135 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:11:42,136 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:11:42,136 - root - INFO - Inserting data into visualization_data for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:43,346 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:11:43,347 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:11:54,474 - root - INFO - Inserting AI analysis into BigQuery table 'ai_analysis'
+2025-04-03 20:11:54,475 - root - INFO - Performance summary length: 861
+2025-04-03 20:11:54,475 - root - INFO - DTC analysis length: 8636
+2025-04-03 20:11:54,475 - root - INFO - Inserting data into ai_analysis for player thu7, session c03e2862-d031-4cd6-9cd8-d042980462ea
+2025-04-03 20:11:55,588 - root - INFO - Inserting new AI analysis with performance_summary length: 861, dtc_analysis length: 8636
+2025-04-03 20:11:55,705 - root - INFO - Successfully inserted new record into ai_analysis
+2025-04-03 20:11:55,706 - root - ERROR - Error inserting AI analysis data: True
+2025-04-03 20:14:13,125 - root - INFO - Calling game function with player_id: thu9
+2025-04-03 20:14:20,179 - beamngpy.BeamNGpy - INFO - Opening BeamNGpy instance.
+2025-04-03 20:14:20,180 - beamngpy.BeamNGpy - DEBUG - Determined BeamNG.* binary to be: C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe
+2025-04-03 20:14:20,180 - beamngpy.BeamNGpy - DEBUG - Created system call for starting BeamNG process: `C:\Program Files (x86)\Steam\steamapps\common\BeamNG.drive\Bin64\BeamNG.drive.x64.exe -nosteam -console -tcom-listen-ip 127.0.0.1 -lua extensions.load('tech/techCore');tech_techCore.openServer(60152) -userpath C:\Users\Public\drive-session-summarizer`
+2025-04-03 20:14:20,412 - beamngpy.BeamNGpy - INFO - Started BeamNG.
+2025-04-03 20:14:30,413 - beamngpy.BeamNGpy - INFO - Connecting to BeamNG.tech at: (localhost, 60152)
+2025-04-03 20:14:31,589 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 20:14:31,589 - beamngpy.BeamNGpy - INFO - BeamNGpy successfully connected to BeamNG.
+2025-04-03 20:14:31,825 - beamngpy.Scenario - DEBUG - Added vehicle with id 'Vehicle'.
+2025-04-03 20:14:31,825 - beamngpy.Scenario - DEBUG - No BeamNGpy instance available. Did not spawn vehicle with id 'Vehicle'.
+2025-04-03 20:14:31,849 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 1 vehicles: Vehicle
+2025-04-03 20:14:31,850 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific roads.
+2025-04-03 20:14:31,850 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 scenario-specific mesh roads.
+2025-04-03 20:14:31,850 - beamngpy.Scenario - DEBUG - The scenario Vehicle Driving Analysis - Google Cloud Next 25 has 0 objects of type `beamngpy.ScenarioObject`
+2025-04-03 20:14:31,851 - beamngpy.Scenario - DEBUG - Generated prefab:
+{ "name": "Vehicle", "class": "BeamNGVehicle", "persistentId": "698143a2-69a7-43c9-b6a1-b9d39032d7e8", "__parent": "Vehicle Driving Analysis - Google Cloud Next 25_group", "position": [497.1917725, 178.2896118, 131.7432404], "color": [1.0, 0.0, 0.0, 0.0], "colorPalette0": [1.0, 0.0, 0.0, 0.0], "colorPalette1": [1.0, 0.0, 0.0, 0.0], "dataBlock": "default_vehicle", "jBeam": "bolide", "licenseText": "thu9", "rotationMatrix": [0.029536891397992093, -0.9995631748732619, 0.0010156199231013381, 0.9995501062635477, 0.029531177460473956, -0.0052435318563667285, 0.0052112488977175166, 0.0011700406330427343, 0.9999857368432027], "autoEnterVehicle": false}
+{ "name": "Vehicle Driving Analysis - Google Cloud Next 25_group", "class": "SimGroup", "persistentId": "4de573fb-f1cd-459b-9bb2-fd926011a12f", "groupPosition": "0.000000 0.000000 0.000000"}
+
+2025-04-03 20:14:31,851 - beamngpy.Scenario - DEBUG - Generated scenarios info dict:
+{'name': 'Vehicle Driving Analysis - Google Cloud Next 25', 'description': None, 'difficulty': 0, 'authors': 'BeamNGpy', 'lapConfig': [], 'forceNoCountDown': True, 'vehicles': {'Vehicle': {'playerUsable': True, 'startFocus': True}}, 'prefabs': ['levels/automation_test_track/scenarios/Vehicle Driving Analysis - Google Cloud Next 25.prefab.json']}
+
+2025-04-03 20:14:31,851 - beamngpy.BeamNGpy - DEBUG - Sending message of type CreateScenario to BeamNG.tech's engine in blocking mode.
+2025-04-03 20:14:32,002 - beamngpy.BeamNGpy - DEBUG - Got response for message of type CreateScenario.
+2025-04-03 20:14:46,235 - beamngpy.BeamNGpy - INFO - Loaded map.
+2025-04-03 20:14:46,236 - beamngpy.Scenario - DEBUG - 0 procedural meshes.
+2025-04-03 20:14:46,236 - beamngpy.BeamNGpy - DEBUG - Sending message of type GetCurrentVehicles to BeamNG.tech's engine in blocking mode.
+2025-04-03 20:14:49,210 - beamngpy.BeamNGpy - DEBUG - Got response for message of type GetCurrentVehicles.
+2025-04-03 20:14:49,226 - beamngpy.Scenario - DEBUG - Got 1 vehicles from scenario.
+2025-04-03 20:14:49,246 - beamngpy.Scenario - DEBUG - Connecting to 1 vehicles.
+2025-04-03 20:14:49,717 - beamngpy.Vehicle - DEBUG - Created new vehicle connection on port 55899
+2025-04-03 20:14:49,718 - beamngpy.Vehicle - INFO - Vehicle Vehicle connected to simulation.
+2025-04-03 20:14:49,718 - beamngpy.BeamNGpy - INFO - Attempting to connect to vehicle Vehicle
+2025-04-03 20:14:52,776 - beamngpy.BeamNGpy - INFO - Successfully connected to BeamNG.tech.
+2025-04-03 20:14:52,776 - beamngpy.BeamNGpy - INFO - Successfully connected to vehicle Vehicle.
+2025-04-03 20:14:52,778 - beamngpy.Scenario - INFO - Connected to scenario: Vehicle Driving Analysis - Google Cloud Next 25
+2025-04-03 20:14:52,901 - beamngpy.BeamNGpy - INFO - Starting scenario.
+2025-04-03 20:14:52,934 - beamngpy.BeamNGpy - INFO - Pausing the simulation.
+2025-04-03 20:15:05,063 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 240 steps.
+2025-04-03 20:15:06,894 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:15:08,571 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:15:10,019 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:15:11,341 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:15:12,720 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:15:14,142 - beamngpy.BeamNGpy - INFO - Advancing the simulation by 30 steps.
+2025-04-03 20:15:14,143 - beamngpy.BeamNGpy - INFO - Closing BeamNGpy instance.
+2025-04-03 20:15:14,143 - beamngpy.Vehicle - INFO - Disconnected from vehicle Vehicle and detached sensors.
+2025-04-03 20:15:14,144 - beamngpy.Scenario - DEBUG - Removed beamngpy instance from scenario class.
+2025-04-03 20:15:14,144 - beamngpy.BeamNGpy - INFO - Terminating BeamNG.tech process.
+2025-04-03 20:15:19,600 - root - INFO - Loading CSV file for player_id: thu9
+2025-04-03 20:15:24,165 - root - INFO - Aggregating statistics
+2025-04-03 20:15:24,170 - root - INFO - Inserting data into analytics_summary for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:25,551 - root - INFO - Successfully inserted new record into analytics_summary
+2025-04-03 20:15:25,551 - root - ERROR - Error inserting analytics data: True
+2025-04-03 20:15:25,552 - root - INFO - Generating performance summary for player_id: thu9, session_id: 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:25,552 - root - INFO - Using model: gemini-2.0-flash-001
+2025-04-03 20:15:25,553 - root - INFO - Prompt for performance summary:
+2025-04-03 20:15:25,554 - root - INFO - 
+        Here are the vehicle performance statistics for player_id: thu9:
+
+        {
+  "Total Time (secs)": 2.5,
+  "Acceleration X (mean)": -2.3593438694067115,
+  "Acceleration Y (mean)": -2.0130831517484795,
+  "Acceleration Z (mean)": -9.323195546155004,
+  "Brake Usage Count": 0,
+  "Brake Average": 0.0,
+  "Fuel Start": 0.9978360026019636,
+  "Fuel End": 0.9988712683206784,
+  "Gears Used": [
+    1.0
+  ],
+  "Gear Change Details": [
+    [
+      0.0,
+      1.0
+    ]
+  ],
+  "Oil Temperature Stats": {
+    "min": 81.37579336824412,
+    "max": 83.82815435332981,
+    "mean": 82.60134943966887
+  },
+  "Part Damage": {
+    "bolide_suspension_R": {
+      "damage": 0.021505376344086023,
+      "name": "Independent Rear Suspension"
+    },
+    "bolide_halfshafts_R": {
+      "damage": 1.0,
+      "name": "Rear Halfshafts"
+    },
+    "bolide_tailcone_support": {
+      "damage": 0.06666666666666667,
+      "name": "Tailcone Support"
+    },
+    "bolide_exhaust_na_a": {
+      "damage": 0.021505376344086023,
+      "name": "Stock Exhaust"
+    },
+    "bolide_door_a_L": {
+      "damage": 0.7261904761904762,
+      "name": "Left Door"
+    },
+    "bolide_swaybar_R": {
+      "damage": 0.0761904761904762,
+      "name": "Rear Sway Bar"
+    },
+    "bolide_quarterpanel_a_L": {
+      "damage": 0.0321285140562249,
+      "name": "Rear Left Quarter Panel"
+    },
+    "bolide_quarterpanel_a_R": {
+      "damage": 0.008032128514056224,
+      "name": "Rear Right Quarter Panel"
+    },
+    "bolide_subframe_F": {
+      "damage": 0.033126293995859216,
+      "name": "Front Subframe"
+    }
+  },
+  "RPM Stats": {
+    "min": 1534.5391146902475,
+    "max": 7354.473940975248,
+    "mean": 5974.902431694397
+  },
+  "Steering Changes": 670.5957255425628,
+  "Throttle Stats": {
+    "min": 0.0,
+    "max": 1.0,
+    "mean": 0.7916666685293118
+  },
+  "Water Temperature Stats": {
+    "min": 81.49765528019299,
+    "max": 84.84048550776029,
+    "mean": 83.21869577558641
+  },
+  "Wheel Speed Stats": {
+    "min": 2.980551949064856,
+    "max": 13.072654828186147,
+    "mean": 9.667263866416052
+  },
+  "Horn Usage Count": 0.0
+}
+
+        Generate a summary and insights from these vehicle performance statistics obtained from a 
+        BeamNG.drive simulation driven by the player. The data reflects various performance 
+        metrics recorded on an automation test track. Given the statistics, provide insights 
+        and recommendations for the player to improve their driving skills and vehicle performance. 
+        The summary should be in a conversational format and should be easy to understand for the player. 
+        Round off the numbers to 2 decimal places use imperial units.
+
+        Be a Critic and a Coach. Provide constructive feedback and suggestions for improvement.
+
+        Structure your response like this:
+
+        The Good:
+        - [Point 1]
+        - [Point 2]
+
+        The Not-So-Good:
+        - [Point 1]
+        - [Point 2]
+
+        The Verdict: [Your conclusion]
+
+        Coach's Corner:
+        [Your advice]
+        
+2025-04-03 20:15:26,005 - root - INFO - GenAI client initialized for project: data-connect-demo4
+2025-04-03 20:15:26,005 - root - INFO - Generation config: Temperature=0.0, Max tokens=8192
+2025-04-03 20:15:26,005 - root - INFO - Sending request to model: gemini-2.0-flash-001
+2025-04-03 20:15:26,006 - google_genai.models - INFO - AFC is enabled with max remote calls: 10.
+2025-04-03 20:15:31,472 - httpx - INFO - HTTP Request: POST https://us-central1-aiplatform.googleapis.com/v1beta1/projects/data-connect-demo4/locations/us-central1/publishers/google/models/gemini-2.0-flash-001:generateContent "HTTP/1.1 200 OK"
+2025-04-03 20:15:31,475 - google_genai.models - INFO - AFC remote call 1 is done.
+2025-04-03 20:15:31,476 - root - INFO - GenAI request completed in 5.47 seconds
+2025-04-03 20:15:31,476 - root - INFO - Response has 1 candidates
+2025-04-03 20:15:31,477 - root - INFO - Candidate 1 details:
+2025-04-03 20:15:31,477 - root - INFO -   Has content: Yes
+2025-04-03 20:15:31,478 - root - INFO -   Number of parts: 1
+2025-04-03 20:15:31,479 - root - INFO -   Part 1 type: <class 'google.genai.types.Part'>
+2025-04-03 20:15:31,479 - root - INFO -   Part 1 has text: True
+2025-04-03 20:15:31,480 - root - INFO -   Part 1 text length: 3463
+2025-04-03 20:15:31,480 - root - ERROR - Generated summary is empty!
+2025-04-03 20:15:31,481 - root - ERROR - Response structure: candidates=[Candidate(content=Content(parts=[Part(video_metadata=None, thought=None, code_execution_result=None, executable_code=None, file_data=None, function_call=None, function_response=None, inline_data=None, text="Okay, thu9, let's break down your driving performance from this run. I've analyzed the data, and here's what I've found:\n\n**The Good:**\n\n*   **Fuel Efficiency:** You barely used any fuel (Fuel Start: 99.78%, Fuel End: 99.89%). This suggests you weren't constantly flooring it, which is good for fuel conservation.\n*   **Gear Usage:** You primarily used 1st gear. This is expected on an automation test track.\n*   **Temperature Control:** Your oil and water temperatures remained within a reasonable range (Oil Mean: 82.60°C, Water Mean: 83.22°C). This indicates the engine wasn't overheating, which is crucial for longevity.\n\n**The Not-So-Good:**\n\n*   **High RPM:** Your average RPM was very high (5974.90), with a max of 7354.47. This suggests you were revving the engine excessively, potentially causing unnecessary wear and tear.\n*   **Rear Halfshafts Damage:** Your rear halfshafts are completely damaged (100%). This is a major issue and indicates a significant impact or stress on the rear drivetrain.\n*   **Inconsistent Acceleration:** The mean acceleration values in X, Y, and Z directions are negative (-2.36 m/s², -2.01 m/s², -9.32 m/s²). This suggests you were frequently decelerating or experiencing significant forces, possibly due to collisions or abrupt braking.\n*   **Steering Changes:** You made a lot of steering changes (670.59). This could indicate instability or over-correction while driving.\n*   **Part Damage:** Besides the halfshafts, you have damage to the suspension, tailcone support, exhaust, door, sway bar, quarter panels, and front subframe. This widespread damage suggests a rough run with multiple impacts.\n*   **Brake Usage:** You didn't use the brakes at all. This is not good, as it means you were either not slowing down when needed or relying on other methods to slow down, which could be damaging to the vehicle.\n\n**The Verdict:**\n\nThu9, this run was far from ideal. While your fuel efficiency was good, the extensive damage to the vehicle, high RPM, and inconsistent acceleration indicate a lack of control and potentially reckless driving. The complete failure of the rear halfshafts is a major red flag.\n\n**Coach's Corner:**\n\nAlright, let's get you back on track. Here's what you need to focus on:\n\n1.  **Smooth Inputs:** Practice smoother acceleration, braking, and steering. Avoid jerky movements that can upset the car's balance and lead to damage.\n2.  **Gear Management:** While you were in 1st gear, learn to shift gears appropriately to keep the RPMs in a more reasonable range. High RPMs are not always necessary for speed and can cause engine wear.\n3.  **Braking Technique:** Learn to use the brakes effectively. Don't rely solely on downshifting or collisions to slow down. Controlled braking is essential for maintaining control and avoiding accidents.\n4.  **Track Awareness:** Pay closer attention to the track and anticipate turns and obstacles. This will allow you to make smoother adjustments and avoid collisions.\n5.  **Damage Mitigation:** Focus on minimizing damage to the vehicle. Every impact, no matter how small, can affect performance and lead to costly repairs.\n6.  **Steering Control:** Reduce the number of steering changes you make. This can be achieved by anticipating turns and making smoother, more deliberate adjustments.\n\nRemember, driving is a skill that takes practice. Focus on these areas, and you'll see a significant improvement in your performance and vehicle longevity. Good luck!\n")], role='model'), citation_metadata=None, finish_message=None, token_count=None, finish_reason=<FinishReason.STOP: 'STOP'>, avg_logprobs=-0.2912815373118331, grounding_metadata=None, index=None, logprobs_result=None, safety_ratings=None)] create_time=datetime.datetime(2025, 4, 4, 1, 15, 26, 653625, tzinfo=TzInfo(UTC)) response_id='rjLvZ7nyJ8fg-O4Pg4DZoQs' model_version='gemini-2.0-flash-001' prompt_feedback=None usage_metadata=GenerateContentResponseUsageMetadata(cache_tokens_details=None, cached_content_token_count=None, candidates_token_count=820, candidates_tokens_details=[ModalityTokenCount(modality=<MediaModality.TEXT: 'TEXT'>, token_count=820)], prompt_token_count=1313, prompt_tokens_details=[ModalityTokenCount(modality=<MediaModality.TEXT: 'TEXT'>, token_count=1313)], thoughts_token_count=None, tool_use_prompt_token_count=None, tool_use_prompt_tokens_details=None, total_token_count=2133) automatic_function_calling_history=[] parsed=None
+2025-04-03 20:15:31,482 - root - ERROR - Error generating performance summary: cannot access local variable 'SummaryResponse' where it is not associated with a value
+2025-04-03 20:15:31,483 - root - ERROR - Traceback (most recent call last):
+  File "C:\Users\Public\drive-session-summarizer\server.py", line 437, in generate_summary_endpoint
+    responses = SummaryResponse("")  # Empty string instead of fallback
+                ^^^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'SummaryResponse' where it is not associated with a value
+
+2025-04-03 20:15:31,485 - root - INFO - Inserting data into visualization_data for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:32,934 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:15:32,934 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:15:32,935 - root - INFO - Inserting data into visualization_data for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:34,650 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:15:34,651 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:15:34,651 - root - INFO - Inserting data into visualization_data for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:35,785 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:15:35,785 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:15:35,786 - root - INFO - Inserting data into visualization_data for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:36,982 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:15:36,982 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:15:36,982 - root - INFO - Inserting data into visualization_data for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:38,107 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:15:38,107 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:15:38,108 - root - INFO - Inserting data into visualization_data for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:39,300 - root - INFO - Successfully inserted new record into visualization_data
+2025-04-03 20:15:39,301 - root - ERROR - Error inserting visualization data: True
+2025-04-03 20:15:50,305 - root - INFO - Inserting AI analysis into BigQuery table 'ai_analysis'
+2025-04-03 20:15:50,305 - root - INFO - Performance summary length: 0
+2025-04-03 20:15:50,306 - root - INFO - DTC analysis length: 8817
+2025-04-03 20:15:50,306 - root - INFO - Inserting data into ai_analysis for player thu9, session 545c1766-c038-4a13-9f9c-c8fda244ef8f
+2025-04-03 20:15:51,510 - root - INFO - Inserting new AI analysis with performance_summary length: 0, dtc_analysis length: 8817
+2025-04-03 20:15:51,590 - root - INFO - Successfully inserted new record into ai_analysis
+2025-04-03 20:15:51,591 - root - ERROR - Error inserting AI analysis data: True

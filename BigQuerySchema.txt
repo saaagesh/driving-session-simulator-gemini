@@ -1,0 +1,172 @@
+// 1. Main telemetry data table schema
+const vehicleTelemetrySchema = [
+  { name: 'Time', type: 'FLOAT', mode: 'REQUIRED' },
+  { name: 'speed', type: 'FLOAT' },
+  { name: 'accXSmooth', type: 'FLOAT' },
+  { name: 'accYSmooth', type: 'FLOAT' },
+  { name: 'accZSmooth', type: 'FLOAT' },
+  { name: 'gear', type: 'INTEGER' },
+  { name: 'rpm', type: 'FLOAT' },
+  { name: 'brake', type: 'FLOAT' },
+  { name: 'throttle', type: 'FLOAT' },
+  { name: 'fuel', type: 'FLOAT' },
+  { name: 'oil_temperature', type: 'FLOAT' },
+  { name: 'water_temperature', type: 'FLOAT' },
+  { name: 'steering', type: 'FLOAT' },
+  { name: 'wheelspeed', type: 'FLOAT' },
+  { name: 'part_damage', type: 'STRING' },  // JSON string of damage data
+  { name: 'horn', type: 'INTEGER' },
+  { name: 'DTC', type: 'STRING' },
+  { name: 'session_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'session_timestamp', type: 'TIMESTAMP', mode: 'REQUIRED' }
+];
+
+// 2. Analytics summary table schema
+const analyticsSummarySchema = [
+  { name: 'player_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'session_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'session_timestamp', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'total_time_secs', type: 'FLOAT' },
+  { name: 'accX_mean', type: 'FLOAT' },
+  { name: 'accY_mean', type: 'FLOAT' },
+  { name: 'accZ_mean', type: 'FLOAT' },
+  { name: 'brake_usage_count', type: 'INTEGER' },
+  { name: 'brake_average', type: 'FLOAT' },
+  { name: 'fuel_start', type: 'FLOAT' },
+  { name: 'fuel_end', type: 'FLOAT' },
+  { name: 'gears_used', type: 'STRING' },  // JSON array
+  { name: 'gear_change_details', type: 'STRING' },  // JSON array
+  { name: 'oil_temp_min', type: 'FLOAT' },
+  { name: 'oil_temp_max', type: 'FLOAT' },
+  { name: 'oil_temp_mean', type: 'FLOAT' },
+  { name: 'part_damage', type: 'STRING' },  // JSON data
+  { name: 'rpm_min', type: 'FLOAT' },
+  { name: 'rpm_max', type: 'FLOAT' },
+  { name: 'rpm_mean', type: 'FLOAT' },
+  { name: 'steering_changes', type: 'FLOAT' },
+  { name: 'throttle_min', type: 'FLOAT' },
+  { name: 'throttle_max', type: 'FLOAT' },
+  { name: 'throttle_mean', type: 'FLOAT' },
+  { name: 'water_temp_min', type: 'FLOAT' },
+  { name: 'water_temp_max', type: 'FLOAT' },
+  { name: 'water_temp_mean', type: 'FLOAT' },
+  { name: 'wheel_speed_min', type: 'FLOAT' },
+  { name: 'wheel_speed_max', type: 'FLOAT' },
+  { name: 'wheel_speed_mean', type: 'FLOAT' },
+  { name: 'horn_usage_count', type: 'INTEGER' }
+];
+
+// 3. AI Generated analysis table schema
+const aiAnalysisSchema = [
+  { name: 'player_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'session_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'session_timestamp', type: 'TIMESTAMP', mode: 'REQUIRED' },
+  { name: 'performance_summary', type: 'STRING' },  // Generated text
+  { name: 'dtc_codes', type: 'STRING' },  // Raw DTC codes
+  { name: 'dtc_analysis', type: 'STRING' },  // Generated analysis
+  { name: 'generation_timestamp', type: 'TIMESTAMP', mode: 'REQUIRED' }
+];
+
+// 4. Visualization data table schema
+const visualizationDataSchema = [
+  { name: 'player_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'session_id', type: 'STRING', mode: 'REQUIRED' },
+  { name: 'graph_type', type: 'STRING', mode: 'REQUIRED' },  // pie, bar, line, area
+  { name: 'title', type: 'STRING' },
+  { name: 'x_axis', type: 'STRING' },
+  { name: 'y_axis', type: 'STRING' },
+  { name: 'data', type: 'STRING', mode: 'REQUIRED' }  // JSON data for the graph
+];
+
+// SQL for creating these tables
+/*
+-- Create the vehicle telemetry table (specific to each player)
+CREATE TABLE IF NOT EXISTS `simulated_vehicle_data.PLAYER_ID_vehicle_data` (
+  Time FLOAT64 NOT NULL,
+  speed FLOAT64,
+  accXSmooth FLOAT64,
+  accYSmooth FLOAT64,
+  accZSmooth FLOAT64,
+  gear INT64,
+  rpm FLOAT64,
+  brake FLOAT64,
+  throttle FLOAT64,
+  fuel FLOAT64,
+  oil_temperature FLOAT64,
+  water_temperature FLOAT64,
+  steering FLOAT64,
+  wheelspeed FLOAT64,
+  part_damage STRING,
+  horn INT64,
+  DTC STRING,
+  session_id STRING NOT NULL,
+  session_timestamp TIMESTAMP NOT NULL
+);
+
+-- Create the analytics summary table
+CREATE TABLE IF NOT EXISTS `simulated_vehicle_data.analytics_summary` (
+  player_id STRING NOT NULL,
+  session_id STRING NOT NULL,
+  session_timestamp TIMESTAMP NOT NULL,
+  total_time_secs FLOAT64,
+  accX_mean FLOAT64,
+  accY_mean FLOAT64,
+  accZ_mean FLOAT64,
+  brake_usage_count INT64,
+  brake_average FLOAT64,
+  fuel_start FLOAT64,
+  fuel_end FLOAT64,
+  gears_used STRING,
+  gear_change_details STRING,
+  oil_temp_min FLOAT64,
+  oil_temp_max FLOAT64,
+  oil_temp_mean FLOAT64,
+  part_damage STRING,
+  rpm_min FLOAT64,
+  rpm_max FLOAT64,
+  rpm_mean FLOAT64,
+  steering_changes FLOAT64,
+  throttle_min FLOAT64,
+  throttle_max FLOAT64,
+  throttle_mean FLOAT64,
+  water_temp_min FLOAT64,
+  water_temp_max FLOAT64,
+  water_temp_mean FLOAT64,
+  wheel_speed_min FLOAT64,
+  wheel_speed_max FLOAT64,
+  wheel_speed_mean FLOAT64,
+  horn_usage_count INT64,
+
+) CLUSTER BY session_timestamp;
+
+-- Create the AI analysis table
+CREATE TABLE IF NOT EXISTS `simulated_vehicle_data.ai_analysis` (
+  player_id STRING NOT NULL,
+  session_id STRING NOT NULL,
+  session_timestamp TIMESTAMP NOT NULL,
+  performance_summary STRING,
+  dtc_codes STRING,
+  dtc_analysis STRING,
+  generation_timestamp TIMESTAMP NOT NULL,
+  
+) CLUSTER BY session_timestamp;
+
+-- Create the visualization data table
+CREATE TABLE IF NOT EXISTS `simulated_vehicle_data.visualization_data` (
+  player_id STRING NOT NULL,
+  session_id STRING NOT NULL,
+  graph_type STRING NOT NULL,
+  title STRING,
+  x_axis STRING,
+  y_axis STRING,
+  data STRING NOT NULL,
+  
+);
+*/
+
+module.exports = {
+  vehicleTelemetrySchema,
+  analyticsSummarySchema,
+  aiAnalysisSchema,
+  visualizationDataSchema
+};

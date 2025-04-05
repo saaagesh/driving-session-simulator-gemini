@@ -1,0 +1,11 @@
+{"Name":"SessionStarted","GFXAdapterType":"Direct3D11","Count":1,"Version":"5","Time":"2025-02-22T22:00:22Z"}
+{"Name":"ControlsUsed","Method":"Keyboard","Duration":79.5601931}
+{"Name":"VehicleUsed","Vehicle":"pickup","CamMode":"orbit","Config":"d15_4wd_A","Duration":85.3499059}
+{"Name":"UIStateUsed","State":"menu.mainmenu","Duration":3.478187}
+{"Name":"UIStateUsed","State":"menu.levels","Duration":3.0970694}
+{"Name":"UIStateUsed","State":"menu.levelDetails","Duration":6.2358596}
+{"Name":"UIStateUsed","State":"menu","Duration":0.084277499999999}
+{"Name":"UIStateUsed","State":"loading","Duration":27.0518239}
+{"Name":"UIStateUsed","State":"play","Duration":79.1469402}
+{"LevelName":"/levels/automation_test_track/main.level.json","Name":"LevelLoaded","Duration":85.7569371}
+{"Name":"GameRunning","Duration":119.1127244}
