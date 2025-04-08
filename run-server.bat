@@ -9,7 +9,7 @@ echo Activating virtual environment...
 call C:\Users\Public\venv\Scripts\activate.bat
 
 REM Change to the project directory
-cd /d C:\Users\Public\drive-session-summarizer
+cd /d C:\Users\Public\drive-session-summarizer-gemini
 
 REM Check if uvicorn is available
 echo Checking for uvicorn...

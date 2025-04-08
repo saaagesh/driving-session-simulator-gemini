@@ -146,3 +146,31 @@ export const getPlayerStats = async (playerId) => {
     throw error;
   }
 };
+
+
+/**
+ * Fetches visualization data for a specific player and session
+ * @param {string} playerId - The player ID to fetch visualization data for
+ * @param {string} sessionId - Optional session ID, if not provided fetches the latest
+ * @returns {Promise<Object>} - The visualization data
+ */
+export const getVisualizationData = async (playerId, sessionId = null) => {
+  try {
+    // Build the query string
+    let url = `/api/visualization_data/${playerId}`;
+    if (sessionId) {
+      url += `?session_id=${sessionId}`;
+    }
+    
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch visualization data: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching visualization data:', error);
+    throw error;
+  }
+};

@@ -8,6 +8,20 @@ import os
 from google.cloud import bigquery
 import config  # Import the config module
 
+
+
+from pydantic import BaseModel
+import logging
+
+# Chat functionality
+class ChatMessage(BaseModel):
+    message: str
+    player_id: str
+
+# Store chat sessions
+chat_sessions = {}
+
+
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, 
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -249,23 +263,27 @@ async def get_player_dashboard(player_id: str):
                     latest_damage = {}
         
         # Get the player stats with proper field handling
+        # Get the player stats with proper field handling
         query = f"""
         WITH SessionStats AS (
-            SELECT
-                session_id,
-                session_timestamp,
-                CAST(total_time_secs AS FLOAT64) as total_time_secs,
-                CAST(accX_mean AS FLOAT64) as accX_mean,
-                CAST(accY_mean AS FLOAT64) as accY_mean,
-                CAST(accZ_mean AS FLOAT64) as accZ_mean,
-                CAST(brake_usage_count AS INT64) as brake_usage_count,
-                CAST((fuel_start - fuel_end) AS FLOAT64) AS fuel_consumption,
-                ARRAY_LENGTH(JSON_EXTRACT_ARRAY(gears_used)) AS unique_gears_count,
-                CAST(rpm_max AS FLOAT64) as rpm_max,
-                CAST(wheel_speed_max AS FLOAT64) as wheel_speed_max,
-                CAST(horn_usage_count AS INT64) as horn_usage_count
-            FROM `{config.PROJECT_ID}.{config.DATASET_ID}.analytics_summary`
-            WHERE player_id = '{player_id}'
+        SELECT
+            session_id,
+            session_timestamp,
+            CAST(total_time_secs AS FLOAT64) as total_time_secs,
+            CAST(accX_mean AS FLOAT64) as accX_mean,
+            CAST(accY_mean AS FLOAT64) as accY_mean,
+            CAST(accZ_mean AS FLOAT64) as accZ_mean,
+            CAST(brake_usage_count AS INT64) as brake_usage_count,
+            CAST((fuel_start - fuel_end) AS FLOAT64) AS fuel_consumption,
+            ARRAY_LENGTH(JSON_EXTRACT_ARRAY(gears_used)) AS unique_gears_count,
+            CAST(rpm_max AS FLOAT64) as rpm_max,
+            CAST(wheel_speed_max AS FLOAT64) as wheel_speed_max,
+            CAST(speed_kmh_max AS FLOAT64) as speed_kmh_max,
+            CAST(speed_kmh_min AS FLOAT64) as speed_kmh_min,
+            CAST(speed_kmh_mean AS FLOAT64) as speed_kmh_mean,
+            CAST(horn_usage_count AS INT64) as horn_usage_count
+        FROM `{config.PROJECT_ID}.{config.DATASET_ID}.analytics_summary`
+        WHERE player_id = '{player_id}'
         )
         SELECT
             COUNT(session_id) AS total_sessions,
@@ -278,8 +296,12 @@ async def get_player_dashboard(player_id: str):
             MAX(rpm_max) AS max_rpm_ever,
             AVG(unique_gears_count) AS avg_gears_used,
             SUM(horn_usage_count) AS total_horn_usage,
+            MAX(speed_kmh_max) AS speed_kmh_max,
+            MIN(speed_kmh_min) AS speed_kmh_min,
+            AVG(speed_kmh_mean) AS speed_kmh_mean,
             (SELECT session_id FROM SessionStats ORDER BY session_timestamp DESC LIMIT 1) AS most_recent_session_id,
             (SELECT wheel_speed_max FROM SessionStats ORDER BY session_timestamp DESC LIMIT 1) AS wheel_speed_max,
+            (SELECT speed_kmh_max FROM SessionStats ORDER BY session_timestamp DESC LIMIT 1) AS latest_speed_kmh_max,
             (SELECT accX_mean FROM SessionStats ORDER BY session_timestamp DESC LIMIT 1) AS accX_mean,
             (SELECT accY_mean FROM SessionStats ORDER BY session_timestamp DESC LIMIT 1) AS accY_mean,
             (SELECT accZ_mean FROM SessionStats ORDER BY session_timestamp DESC LIMIT 1) AS accZ_mean,
@@ -294,24 +316,28 @@ async def get_player_dashboard(player_id: str):
         stats = None
         for row in results:
             stats = {
-                "total_sessions": int(row.total_sessions) if row.total_sessions is not None else 0,
-                "total_driving_time": float(row.total_driving_time) if row.total_driving_time is not None else 0.0,
-                "avg_session_time": float(row.avg_session_time) if row.avg_session_time is not None else 0.0,
-                "avg_fuel_consumption": float(row.avg_fuel_consumption) if row.avg_fuel_consumption is not None else 0.0,
-                "avg_brake_usage": float(row.avg_brake_usage) if row.avg_brake_usage is not None else 0.0,
-                "top_speed_ever": float(row.top_speed_ever) if row.top_speed_ever is not None else 0.0,
-                "avg_top_speed": float(row.avg_top_speed) if row.avg_top_speed is not None else 0.0,
-                "max_rpm_ever": float(row.max_rpm_ever) if row.max_rpm_ever is not None else 0.0,
-                "avg_gears_used": float(row.avg_gears_used) if row.avg_gears_used is not None else 0.0,
-                "total_horn_usage": int(row.total_horn_usage) if row.total_horn_usage is not None else 0,
-                "most_recent_session_id": row.most_recent_session_id,
-                "wheel_speed_max": float(row.wheel_speed_max) if row.wheel_speed_max is not None else 0.0,
-                "accX_mean": float(row.accX_mean) if row.accX_mean is not None else 0.0,
-                "accY_mean": float(row.accY_mean) if row.accY_mean is not None else 0.0,
-                "accZ_mean": float(row.accZ_mean) if row.accZ_mean is not None else 0.0,
-                "brake_usage_count": int(row.brake_usage_count) if row.brake_usage_count is not None else 0,
-                "latest_part_damage": latest_damage
-            }
+            "total_sessions": int(row.total_sessions) if row.total_sessions is not None else 0,
+            "total_driving_time": float(row.total_driving_time) if row.total_driving_time is not None else 0.0,
+            "avg_session_time": float(row.avg_session_time) if row.avg_session_time is not None else 0.0,
+            "avg_fuel_consumption": float(row.avg_fuel_consumption) if row.avg_fuel_consumption is not None else 0.0,
+            "avg_brake_usage": float(row.avg_brake_usage) if row.avg_brake_usage is not None else 0.0,
+            "top_speed_ever": float(row.top_speed_ever) if row.top_speed_ever is not None else 0.0,
+            "avg_top_speed": float(row.avg_top_speed) if row.avg_top_speed is not None else 0.0,
+            "max_rpm_ever": float(row.max_rpm_ever) if row.max_rpm_ever is not None else 0.0,
+            "avg_gears_used": float(row.avg_gears_used) if row.avg_gears_used is not None else 0.0,
+            "total_horn_usage": int(row.total_horn_usage) if row.total_horn_usage is not None else 0,
+            "most_recent_session_id": row.most_recent_session_id,
+            "wheel_speed_max": float(row.wheel_speed_max) if row.wheel_speed_max is not None else 0.0,
+            "speed_kmh_max": float(row.speed_kmh_max) if row.speed_kmh_max is not None else 0.0,
+            "speed_kmh_min": float(row.speed_kmh_min) if row.speed_kmh_min is not None else 0.0,
+            "speed_kmh_mean": float(row.speed_kmh_mean) if row.speed_kmh_mean is not None else 0.0,
+            "latest_speed_kmh_max": float(row.latest_speed_kmh_max) if hasattr(row, 'latest_speed_kmh_max') and row.latest_speed_kmh_max is not None else 0.0,
+            "accX_mean": float(row.accX_mean) if row.accX_mean is not None else 0.0,
+            "accY_mean": float(row.accY_mean) if row.accY_mean is not None else 0.0,
+            "accZ_mean": float(row.accZ_mean) if row.accZ_mean is not None else 0.0,
+            "brake_usage_count": int(row.brake_usage_count) if row.brake_usage_count is not None else 0,
+            "latest_part_damage": latest_damage
+        }
         
         if not stats:
             logger.warning(f"No statistics generated for player: {player_id}")
@@ -322,14 +348,15 @@ async def get_player_dashboard(player_id: str):
         
         # Get detailed trend data for all sessions
         trend_query = f"""
-        SELECT 
+        SELECT
             session_id,
             session_timestamp,
             CAST(wheel_speed_max AS FLOAT64) as top_speed,
+            CAST(speed_kmh_max AS FLOAT64) as speed_kmh,
             CAST(brake_usage_count AS INT64) as brake_usage_count,
             CAST((fuel_start - fuel_end) AS FLOAT64) as fuel_consumption,
             CAST(accX_mean AS FLOAT64) as accX_mean,
-            CAST(accY_mean AS FLOAT64) as accY_mean, 
+            CAST(accY_mean AS FLOAT64) as accY_mean,
             CAST(accZ_mean AS FLOAT64) as accZ_mean,
             CAST(rpm_max AS FLOAT64) as rpm_max,
             CAST(steering_changes AS FLOAT64) as steering_changes
@@ -344,17 +371,18 @@ async def get_player_dashboard(player_id: str):
         trend_data = []
         for row in trend_results:
             trend_data.append({
-                "session_id": row.session_id,
-                "timestamp": row.session_timestamp.isoformat() if hasattr(row.session_timestamp, 'isoformat') else str(row.session_timestamp),
-                "top_speed": float(row.top_speed) if row.top_speed is not None else 0.0,
-                "brake_usage_count": int(row.brake_usage_count) if row.brake_usage_count is not None else 0,
-                "fuel_consumption": float(row.fuel_consumption) if row.fuel_consumption is not None else 0.0,
-                "accX_mean": float(row.accX_mean) if row.accX_mean is not None else 0.0,
-                "accY_mean": float(row.accY_mean) if row.accY_mean is not None else 0.0,
-                "accZ_mean": float(row.accZ_mean) if row.accZ_mean is not None else 0.0,
-                "rpm_max": float(row.rpm_max) if row.rpm_max is not None else 0.0,
-                "steering_changes": float(row.steering_changes) if row.steering_changes is not None else 0.0
-            })
+            "session_id": row.session_id,
+            "timestamp": row.session_timestamp.isoformat() if hasattr(row.session_timestamp, 'isoformat') else str(row.session_timestamp),
+            "top_speed": float(row.top_speed) if row.top_speed is not None else 0.0,
+            "speed_kmh": float(row.speed_kmh) if hasattr(row, 'speed_kmh') and row.speed_kmh is not None else 0.0,
+            "brake_usage_count": int(row.brake_usage_count) if row.brake_usage_count is not None else 0,
+            "fuel_consumption": float(row.fuel_consumption) if row.fuel_consumption is not None else 0.0,
+            "accX_mean": float(row.accX_mean) if row.accX_mean is not None else 0.0,
+            "accY_mean": float(row.accY_mean) if row.accY_mean is not None else 0.0,
+            "accZ_mean": float(row.accZ_mean) if row.accZ_mean is not None else 0.0,
+            "rpm_max": float(row.rpm_max) if row.rpm_max is not None else 0.0,
+            "steering_changes": float(row.steering_changes) if row.steering_changes is not None else 0.0
+        })
         
         stats["trend_data"] = trend_data
         
@@ -399,6 +427,86 @@ async def get_player_dashboard(player_id: str):
         logger.error(f"Error retrieving dashboard data for player {player_id}: {str(e)}")
         return JSONResponse(
             content={"error": f"Failed to retrieve data: {str(e)}"},
+            status_code=500
+        )
+
+
+
+# Add this endpoint to your react_server.py file, before the catch-all route that serves the React app
+
+@app.get("/api/visualization_data/{player_id}", response_class=JSONResponse)
+async def get_visualization_data(player_id: str, session_id: str = None):
+    logger.info(f"Visualization data endpoint called for player: {player_id}, session: {session_id}")
+    try:
+        client = bigquery.Client()
+        
+        # Build the query based on whether a session_id was provided
+        if session_id:
+            query = f"""
+            SELECT 
+                graph_type, 
+                title,
+                x_axis,
+                y_axis,
+                data 
+            FROM `{config.PROJECT_ID}.{config.DATASET_ID}.visualization_data`
+            WHERE player_id = '{player_id}' AND session_id = '{session_id}'
+            """
+        else:
+            # If no session_id provided, get the most recent session
+            query = f"""
+            WITH latest_session AS (
+                SELECT session_id
+                FROM `{config.PROJECT_ID}.{config.DATASET_ID}.analytics_summary` 
+                WHERE player_id = '{player_id}'
+                ORDER BY session_timestamp DESC
+                LIMIT 1
+            )
+            SELECT 
+                graph_type, 
+                title,
+                x_axis,
+                y_axis,
+                data 
+            FROM `{config.PROJECT_ID}.{config.DATASET_ID}.visualization_data`
+            WHERE player_id = '{player_id}' 
+            AND session_id = (SELECT session_id FROM latest_session)
+            """
+        
+        query_job = client.query(query)
+        results = list(query_job.result())
+        
+        if not results:
+            logger.warning(f"No visualization data found for player: {player_id}")
+            return JSONResponse(
+                content={"error": f"No visualization data available for player {player_id}"},
+                status_code=404
+            )
+        
+        # Process the visualization data
+        charts = []
+        for row in results:
+            # Parse the JSON data string to a Python object
+            try:
+                chart_data = json.loads(row.data) if isinstance(row.data, str) else row.data
+            except json.JSONDecodeError:
+                logger.error(f"Error parsing chart data JSON: {row.data}")
+                chart_data = []
+            
+            charts.append({
+                "graph_type": row.graph_type,
+                "title": row.title,
+                "x_axis": row.x_axis,
+                "y_axis": row.y_axis,
+                "data": chart_data
+            })
+        
+        return JSONResponse(content={"charts": charts})
+            
+    except Exception as e:
+        logger.error(f"Error retrieving visualization data: {str(e)}")
+        return JSONResponse(
+            content={"error": f"Failed to retrieve visualization data: {str(e)}"},
             status_code=500
         )
 
@@ -745,6 +853,119 @@ async def get_latest_report():
 #             }
 #         )
     
+
+
+
+
+@app.post("/api/chat", response_class=JSONResponse)
+async def chat_endpoint(chat_message: ChatMessage):
+    logger.info(f"Chat endpoint called for player: {chat_message.player_id}")
+    try:
+        player_id = chat_message.player_id
+        message = chat_message.message
+
+        # Check if player exists
+        client = bigquery.Client()
+        check_query = f'''
+        SELECT COUNT(*) as count
+        FROM `{config.PROJECT_ID}.{config.DATASET_ID}.analytics_summary`
+        WHERE player_id = '{player_id}'
+        '''
+
+        check_job = client.query(check_query)
+        check_result = list(check_job.result())[0]
+
+        if check_result.count == 0:
+            logger.warning(f"No records found for player: {player_id}")
+            return JSONResponse(
+                content={"response": f"No data available for player {player_id}. Please run a simulation first."},
+                status_code=404
+            )
+
+        # Get player data
+        data_query = f'''
+        SELECT *
+        FROM `{config.PROJECT_ID}.{config.DATASET_ID}.analytics_summary`
+        WHERE player_id = '{player_id}'
+        ORDER BY session_timestamp DESC
+        LIMIT 1
+        '''
+
+        data_job = client.query(data_query)
+        data_results = list(data_job.result())
+
+        if not data_results:
+            return JSONResponse(
+                content={"response": "No data found for this player. Please run a simulation first."},
+                status_code=404
+            )
+
+        # Get DTC codes
+        dtc_query = f'''
+        SELECT dtc_codes
+        FROM `{config.PROJECT_ID}.{config.DATASET_ID}.ai_analysis`
+        WHERE player_id = '{player_id}'
+        ORDER BY session_timestamp DESC
+        LIMIT 1
+        '''
+
+        dtc_job = client.query(dtc_query)
+        dtc_results = list(dtc_job.result())
+
+        dtc_codes = ""
+        if dtc_results and hasattr(dtc_results[0], 'dtc_codes'):
+            dtc_codes = dtc_results[0].dtc_codes
+
+        # Convert BigQuery row to dict for easier handling
+        stats = {}
+        for key, value in data_results[0].items():
+            stats[key] = value
+
+        # Initialize Vertex AI
+        from vertexai.preview.generative_models import GenerativeModel
+        import vertexai
+
+        # Initialize Vertex AI with project and location from config
+        vertexai.init(project=config.PROJECT_ID, location=config.LOCATION)
+
+        # Create a new chat session for each request to avoid state issues
+        model = GenerativeModel("gemini-2.0-flash-001")
+        chat = model.start_chat(history=[])
+
+        # Send context message with each request
+        context_message = f'''For the vehicle with player_id: {player_id}, the statistics are as follows:
+
+        {stats}
+
+        The DTC codes are: {dtc_codes}
+
+        Based on the above statistics and DTC codes, help user with their queries. Respond in Plain Text, Strictly No Markdown or HTML.
+        '''
+
+        logger.info("Sending context message to chat model")
+        chat.send_message(context_message)
+
+        # Send user message and get response
+        response = chat.send_message(
+            message,
+            generation_config={
+                "max_output_tokens": 2048,
+                "temperature": 0,
+                "top_p": 1
+            },
+            stream=False,
+        )
+
+        return JSONResponse(content={"response": response.text})
+
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {str(e)}")
+        return JSONResponse(
+            content={"response": f"An error occurred: {str(e)}. Please try again later."},
+            status_code=500
+        )
+
+
 
 
 # Root endpoint to serve React app's index.html

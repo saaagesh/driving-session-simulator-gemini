@@ -383,11 +383,28 @@ const VehicleDamageVisualization = ({ damageData }) => {
                   </p>
                 </div>
               </div>
+              {/* Section to display the list of damaged parts */}
+              <div className="mt-3 border-t pt-3">
+                <p className="text-gray-500 mb-2">Damaged Parts List:</p>
+                <ul className="text-sm space-y-1">
+                  {Object.entries(partDamage)
+                    .filter(([_key, value]) => value > 0)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([key, value]) => (
+                      <li key={key} className="flex justify-between">
+                        <span>{vehicleParts[key]?.name || key}</span>
+                        <span className="font-medium" style={{ color: getColorForDamage(value) }}>
+                          {Math.round(value * 100)}%
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

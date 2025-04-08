@@ -12,7 +12,9 @@ import datetime
 import uuid
 import config  # Import the config module
 
-beamng = BeamNGpy('localhost', 60152, home='C:/Program Files (x86)/Steam/steamapps/common/BeamNG.drive', user='C:/Users/Public/drive-session-summarizer')
+beamng = BeamNGpy('localhost', 51394, home='C:/Program Files (x86)/Steam/steamapps/common/BeamNG.drive', user='C:/Users/admin/driving-session-simulator-gemini/user')
+
+
 
 def game(player_id):
     time.sleep(5)
@@ -47,11 +49,24 @@ def game(player_id):
     vehicle.switch()
     beamng.control.step(240)
 
-    for t in range(0, 180, 30):
+    for t in range(0, 1800, 30):
         vehicle.sensors.poll()
         row_data = {'Time': t/60}
+            
+        
+        # print("Available sensor data keys:", [key for sensor_name, sensor in vehicle.sensors.items() for key in sensor.data.keys()])
         for sensor_name, sensor in vehicle.sensors.items():
+            # Print the actual sensor data to debug
+            # print(f"Sensor {sensor_name} data: {sensor.data}")
             filtered_data = {key: value for key, value in sensor.data.items() if key in essential_keys}
+
+            # Calculate speed_kmh from velocity vector if 'vel' is available
+            if 'vel' in sensor.data:
+                vel_vector = sensor.data['vel']
+                # Calculate magnitude of velocity vector (3D)
+                speed_ms = (vel_vector[0]**2 + vel_vector[1]**2 + vel_vector[2]**2)**0.5
+                # Convert from m/s to km/h
+                row_data['speed_kmh'] = speed_ms * 3.6
             row_data.update({f"{key}": value for key, value in filtered_data.items()})
         if t == 0:
             column_names.extend(sorted(row_data.keys())[1:])  

@@ -1,7 +1,7 @@
 // src/App.jsx - Updated with ModernHeader integration
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AppContext } from './context/AppContext';
+import { AppProvider } from './context/AppContext'; // Import the pro
 import ModernHeader from './components/ModernHeader';
 import LoginForm from './components/LoginForm';
 import VehicleReport from './components/VehicleReport';
@@ -95,20 +95,10 @@ function App() {
   };
 
   return (
-    <AppContext.Provider value={contextValue}>
+    <AppProvider>
       <Router>
-        <div className={`min-h-screen bg-gray-100 ${darkMode ? 'dark' : ''}`}>
+        <div className="min-h-screen bg-gray-100">
           <HeaderWithLocation />
-          
-          {isLoading && <LoadingIndicator />}
-          
-          {error && (
-            <div className="container mx-auto mt-4 px-4">
-              <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-4">
-                <p className="font-medium">Error: {error}</p>
-              </div>
-            </div>
-          )}
           
           <div className="container mx-auto py-6 px-4">
             <Routes>
@@ -131,10 +121,10 @@ function App() {
             </Routes>
           </div>
           
-          {playerId && <ChatInterface />}
+          <ChatInterface />
         </div>
       </Router>
-    </AppContext.Provider>
+    </AppProvider>
   );
 }
 

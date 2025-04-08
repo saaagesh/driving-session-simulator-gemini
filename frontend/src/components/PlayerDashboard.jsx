@@ -1,8 +1,11 @@
 // src/components/PlayerDashboard.jsx - Updated version
 import React, { useState, useEffect, useContext } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { AppContext } from '../context/AppContext';
 import { getPlayerStats } from '../api/apiService';
 import { refreshDashboardData } from '../api/apiService';
+import { getVisualizationData } from '../api/apiService';
+import ChatInterface from './ChatInterface';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer, AreaChart, Area
@@ -10,7 +13,7 @@ import {
 import VehicleDamageVisualization from './VehicleDamageVisualization';
 
 function PlayerDashboard() {
-  const { setIsLoading, setError } = useContext(AppContext);
+  const { setIsLoading, setError, playerId, setPlayerId, } = useContext(AppContext);
   const [stats, setStats] = useState(null);
   const [activeSection, setActiveSection] = useState('vehicle');
   const [playerList, setPlayerList] = useState([]);
@@ -20,6 +23,24 @@ function PlayerDashboard() {
   const [badPoints, setBadPoints] = useState([]);
   const [verdictText, setVerdictText] = useState('');
   const [vehicleCarePercentage, setVehicleCarePercentage] = useState(100);
+  const [driverScore, setDriverScore] = useState(70);
+  const [showScoreExplanation, setShowScoreExplanation] = useState(false);
+  const [rawPerformanceSummary, setRawPerformanceSummary] = useState('');
+  const [coachComments, setCoachComments] = useState('');
+  const [showFullAnalysis, setShowFullAnalysis] = useState(false);
+  const [visualizationData, setVisualizationData] = useState([]);
+  const [selectedChart, setSelectedChart] = useState(null);
+  const [isLoadingCharts, setIsLoadingCharts] = useState(false);
+  const [chartData, setChartData] = useState([]);
+  const [activeChart, setActiveChart] = useState(0);
+  const [loadingCharts, setLoadingCharts] = useState(false);
+  const [scoreComponents, setScoreComponents] = useState({
+    speed: 70,
+    control: 80,
+    efficiency: 90,
+    technique: 75,
+    vehicleCare: 60
+  });
   
   // Chart color scheme
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -195,6 +216,52 @@ function PlayerDashboard() {
 
         
         setStats(processedData);
+
+        // Process AI insights if available
+        if (stats && stats.ai_insights && stats.ai_insights.performance_summary) {
+
+          setRawPerformanceSummary(data.ai_insights.performance_summary);
+        
+          // Extract Coach's comments if they exist
+          const coachMatch = data.ai_insights.performance_summary.match(/Coach's Corner:[\s\S]*?(?=$)/i);
+          if (coachMatch) {
+            setCoachComments(coachMatch[0].replace("Coach's Corner:", "").trim());
+          } else {
+            setCoachComments("No coaching feedback available for this session.");
+          }
+
+
+          // Extract insights from AI analysis
+          const aiInsights = extractInsightsFromAI(stats.ai_insights.performance_summary);
+          
+          // Set the insights and verdict
+          setGoodPoints(aiInsights.good);
+          setBadPoints(aiInsights.bad);
+          setVerdictText(aiInsights.verdict);
+          
+          // If we don't have enough insights from AI, supplement with generated ones
+          const generatedInsights = generateInsightsFromStats(stats);
+          
+          if (aiInsights.good.length < 2) {
+            setGoodPoints(prev => [...prev, ...generatedInsights.good].slice(0, 4));
+          }
+          
+          if (aiInsights.bad.length < 2) {
+            setBadPoints(prev => [...prev, ...generatedInsights.bad].slice(0, 4));
+          }
+          
+          if (!aiInsights.verdict) {
+            setVerdictText(generatedInsights.verdict);
+          }
+        } else if (stats) {
+          // If no AI insights available, generate them from stats
+          const generatedInsights = generateInsightsFromStats(stats);
+          setGoodPoints(generatedInsights.good);
+          setBadPoints(generatedInsights.bad);
+          setVerdictText(generatedInsights.verdict);
+        }
+        
+
         
         // Process part damage data
         if (processedData.latest_part_damage) {
@@ -249,7 +316,289 @@ function PlayerDashboard() {
     
     loadPlayerStats();
   }, [selectedPlayer, setIsLoading, setError]);
+
+  useEffect(() => {
+    // Calculate realistic driver score whenever stats change
+    if (stats) {
+      const scoreData = calculateRealisticDriverScore(stats);
+      setDriverScore(scoreData.total);
+      setScoreComponents(scoreData.components);
+    }
+  }, [stats]);
+
+  // Fix the useEffect hook to correctly set selectedChart as an index
+
+useEffect(() => {
+  // Fetch visualization data when selectedPlayer changes
+  async function fetchVisualizationData() {
+    if (!selectedPlayer) return;
+    
+    setIsLoadingCharts(true);
+    try {
+      const data = await getVisualizationData(selectedPlayer);
+      console.log("Visualization data:", data);
+      
+      if (data && data.charts && data.charts.length > 0) {
+        // Process the charts data to ensure it's in the right format
+        const processedCharts = data.charts.map(chart => {
+          // Ensure data is an array
+          let chartData = chart.data;
+          if (typeof chartData === 'string') {
+            try {
+              chartData = JSON.parse(chartData);
+            } catch (e) {
+              console.error("Error parsing chart data:", e);
+              chartData = [];
+            }
+          }
+          
+          // For pie charts that use object format, convert to array format
+          if (chart.graph_type === 'pie' && !Array.isArray(chartData)) {
+            chartData = Object.entries(chartData).map(([name, value]) => {
+              // Handle when value is an object with damage property
+              const damageValue = typeof value === 'object' && value !== null && 'damage' in value
+                ? value.damage
+                : value;
+              
+              const displayName = typeof value === 'object' && value !== null && 'name' in value
+                ? value.name
+                : name;
+                
+              return {
+                name: displayName,
+                value: parseFloat(damageValue)
+              };
+            });
+          }
+          
+          return {
+            ...chart,
+            data: chartData
+          };
+        });
+        
+        setVisualizationData(processedCharts);
+        // Set selectedChart to 0 (first chart) if no chart is selected
+        if (selectedChart === null) {
+          setSelectedChart(0);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading visualization data:", error);
+    } finally {
+      setIsLoadingCharts(false);
+    }
+  }
   
+  fetchVisualizationData();
+}, [selectedPlayer, selectedChart]);
+  
+  // Add this function to the PlayerDashboard component
+  // Update the renderVisualizationChart function in PlayerDashboard.jsx
+
+const renderVisualizationChart = (chart) => {
+  if (!chart || !chart.data || chart.data.length === 0) {
+    return (
+      <div className="text-center p-6">
+        <p className="text-gray-500">No data available for this chart</p>
+      </div>
+    );
+  }
+  
+  const chartHeight = 350;
+  const isFuelChart = chart.title.includes('Fuel');
+  const isGearChart = chart.title.includes('Gear');
+  
+  // Sort gear data if it's a gear distribution chart
+  let chartData = chart.data;
+  if (isGearChart && Array.isArray(chartData)) {
+    chartData = [...chartData].sort((a, b) => {
+      const gearA = typeof a.Gear === 'string' ? parseInt(a.Gear, 10) : a.Gear;
+      const gearB = typeof b.Gear === 'string' ? parseInt(b.Gear, 10) : b.Gear;
+      return gearA - gearB;
+    });
+  }
+  
+  switch (chart.graph_type) {
+    case 'pie':
+      return (
+        <div style={{ height: chartHeight }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={120}
+                fill="#8884d8"
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value) => value.toFixed(2)} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      );
+    
+    case 'bar':
+      return (
+        <div style={{ height: chartHeight }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey={chart.x_axis} />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey={chart.y_axis} fill="#8884d8">
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      );
+    
+    case 'line':
+      return (
+        <div style={{ height: chartHeight }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey={chart.x_axis} 
+                label={{ value: chart.x_axis, position: 'insideBottom', offset: -5 }} 
+              />
+              <YAxis
+                domain={isFuelChart ? [0.9, 1.0] : ['auto', 'auto']}
+                label={{ value: chart.y_axis, angle: -90, position: 'insideLeft' }}
+                tickFormatter={isFuelChart ? (val) => val.toFixed(3) : (val) => val}
+              />
+              <Tooltip 
+                formatter={(value) => isFuelChart ? value.toFixed(3) : value.toFixed(2)}
+              />
+              <Legend />
+              <Line 
+                type="monotone" 
+                dataKey={chart.y_axis} 
+                stroke="#8884d8" 
+                activeDot={{ r: 8 }} 
+                strokeWidth={2}
+                connectNulls={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      );
+    
+    case 'area':
+      return (
+        <div style={{ height: chartHeight }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey={chart.x_axis} 
+                label={{ value: chart.x_axis, position: 'insideBottom', offset: -5 }} 
+              />
+              <YAxis
+                domain={isFuelChart ? [0.9, 1.0] : ['auto', 'auto']}
+                label={{ value: chart.y_axis, angle: -90, position: 'insideLeft' }}
+                tickFormatter={isFuelChart ? (val) => val.toFixed(3) : (val) => val}
+              />
+              <Tooltip 
+                formatter={(value) => isFuelChart ? value.toFixed(3) : value.toFixed(2)}
+              />
+              <Legend />
+              <Area 
+                type="monotone" 
+                dataKey={chart.y_axis} 
+                stroke="#8884d8" 
+                fill="#8884d8" 
+                fillOpacity={0.6}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      );
+    
+    default:
+      return (
+        <div className="text-center p-6">
+          <p className="text-gray-500">Unsupported chart type: {chart.graph_type}</p>
+        </div>
+      );
+  }
+};
+  
+  // Function to create insights from stats when AI insights aren't available
+  function generateInsightsFromStats(stats) {
+    if (!stats) return { good: [], bad: [], verdict: "" };
+    
+    const goodPoints = [];
+    const badPoints = [];
+    let verdict = "";
+    
+    // Generate good points based on stats
+    if (stats.speed_kmh_max || stats.wheel_speed_max || stats.top_speed_ever) {
+      const topSpeed = Math.round(parseFloat(stats.speed_kmh_max || stats.wheel_speed_max || stats.top_speed_ever || 0));
+      goodPoints.push(`Your top speed reached ${topSpeed} km/h, showing ${topSpeed > 100 ? 'excellent' : 'good'} acceleration capabilities.`);
+    }
+    
+    if (stats.unique_gears_count || stats.gears_used) {
+      const gearCount = stats.unique_gears_count || 
+        (Array.isArray(stats.gears_used) ? stats.gears_used.length : 
+        (typeof stats.gears_used === 'string' ? safeJsonParse(stats.gears_used).length : 1));
+      
+      if (gearCount > 3) {
+        goodPoints.push(`You used ${gearCount} gears during your drive, demonstrating good understanding of gear shifting.`);
+      } else {
+        badPoints.push(`You only used ${gearCount} gear(s), consider using more gears for optimal performance.`);
+      }
+    }
+    
+    if (stats.max_rpm_ever || stats.rpm_max) {
+      const maxRPM = Math.round(parseFloat(stats.max_rpm_ever || stats.rpm_max || 0));
+      goodPoints.push(`Achieved a peak RPM of ${maxRPM.toLocaleString()}, utilizing the engine effectively.`);
+    }
+    
+    // Generate bad points based on stats
+    if (stats.brake_usage_count !== undefined) {
+      const brakeCount = parseInt(stats.brake_usage_count || 0);
+      if (brakeCount > 5) {
+        badPoints.push(`Brake usage of ${brakeCount} indicates a need for smoother driving.`);
+      } else {
+        goodPoints.push(`Minimal brake usage of ${brakeCount} shows a smooth driving style.`);
+      }
+    }
+    
+    if (stats.latest_part_damage && Object.keys(stats.latest_part_damage).length > 0) {
+      badPoints.push(`Vehicle damage detected indicates room for improved handling and collision avoidance.`);
+    }
+    
+    // Generate a verdict
+    const driverScore = calculateDriverScore(stats);
+    if (driverScore > 80) {
+      verdict = "Excellent driving performance! You've demonstrated good control, efficiency, and technical skill.";
+    } else if (driverScore > 60) {
+      verdict = "Good driving session with some areas for improvement. Focus on maintaining consistent performance.";
+    } else {
+      verdict = "This session shows several areas that need improvement. Consider focusing on smoother control and better vehicle care.";
+    }
+    
+    return {
+      good: goodPoints,
+      bad: badPoints,
+      verdict: verdict
+    };
+  }
 
 
   function safeJsonParse(jsonString, defaultValue = []) {
@@ -316,6 +665,193 @@ function PlayerDashboard() {
       return defaultValue;
     }
   }
+
+  // Add these functions to PlayerDashboard.jsx to parse the AI analysis data
+
+// Function to extract insights from the performance summary
+// Replace this function in PlayerDashboard.jsx
+// Update this function to preserve the original text format
+function extractInsightsFromAI(aiSummary) {
+  if (!aiSummary) return { good: [], bad: [], verdict: "" };
+  
+  // Extract the verdict section if it exists
+  const verdictMatch = aiSummary.match(/The Verdict:[\s\S]*?(?=Coach's Corner:|$)/i);
+  const verdict = verdictMatch ? verdictMatch[0].replace("The Verdict:", "").trim() : "";
+  
+  // Look for sections that might contain good/bad points
+  const goodPointsMatch = aiSummary.match(/The Good:[\s\S]*?(?=The Not-So-Good:|The Bad:|$)/i);
+  const badPointsMatch = aiSummary.match(/(The Not-So-Good:|The Bad:)[\s\S]*?(?=Coach's Corner:|The Verdict:|$)/i);
+  
+  // Extract the full text sections
+  const goodPoints = goodPointsMatch 
+    ? extractBulletPoints(goodPointsMatch[0], true)
+    : [];
+    
+  const badPoints = badPointsMatch 
+    ? extractBulletPoints(badPointsMatch[0], true)
+    : [];
+  
+  return {
+    verdict: verdict,
+    good: goodPoints,
+    bad: badPoints
+  };
+}
+
+// Update the extractBulletPoints function to preserve full text
+function extractBulletPoints(text, preserveFull = false) {
+  if (!text) return [];
+  
+  // Remove section title
+  const contentText = text.split("\n").slice(1).join("\n");
+  
+  // If preserving full text, just return the content
+  if (preserveFull) {
+    // Try to find bullet points
+    const bulletMatches = contentText.match(/[•\-\*]\s+(.*?)(?=\n[•\-\*]|\n\n|$)/gs);
+    if (bulletMatches && bulletMatches.length > 0) {
+      return bulletMatches
+        .map(bullet => bullet.replace(/^[•\-\*]\s+/, '').trim());
+    }
+    
+    // If no bullet points, split into sentences
+    const sentences = contentText.split(/\.\s+/);
+    return sentences
+      .map(s => s.trim())
+      .filter(s => s.length > 0 && !s.startsWith('The'));
+  }
+  
+  // Original filtering logic for non-preserved text
+  const bulletMatches = contentText.match(/[•\-\*]\s+(.*?)(?=\n[•\-\*]|\n\n|$)/gs);
+  if (bulletMatches && bulletMatches.length > 0) {
+    return bulletMatches
+      .map(bullet => bullet.replace(/^[•\-\*]\s+/, '').trim())
+      .filter(bullet => bullet.length > 10);
+  }
+  
+  const sentences = contentText.split(/\.\s+/);
+  return sentences
+    .map(s => s.trim())
+    .filter(s => s.length > 10 && !s.startsWith('The'));
+}
+
+function calculateRealisticDriverScore(stats) {
+  if (!stats) return { total: 50, components: {} };
+  
+  // Base score components (total: 100 points)
+  let speedScore = 0;         // Max 20 points
+  let controlScore = 0;       // Max 25 points
+  let efficiencyScore = 0;    // Max 20 points
+  let techniqueScore = 0;     // Max 20 points
+  let vehicleCareScore = 0;   // Max 15 points
+  
+  // Speed score - based on top speed achieved
+  const topSpeed = parseFloat(stats.speed_kmh_max || stats.wheel_speed_max || stats.top_speed_ever || 0);
+  speedScore = Math.min(20, Math.round(topSpeed / 8));
+  
+  // Control score - based on brake usage and steering changes
+  const brakeUsage = parseInt(stats.brake_usage_count || stats.avg_brake_usage || 0);
+  const steeringChanges = parseFloat(stats.steering_changes || 0);
+  
+  // Lower brake usage is better (up to a point)
+  const brakeScore = brakeUsage < 3 ? 10 : brakeUsage < 8 ? 15 - brakeUsage : 5;
+  
+  // Moderate steering changes are ideal
+  const steeringScore = steeringChanges < 5 ? 5 : 
+    steeringChanges < 20 ? 10 : 
+    steeringChanges < 50 ? 8 : 5;
+  
+  controlScore = brakeScore + steeringScore;
+  
+  // Efficiency score - based on fuel consumption
+  const fuelConsumption = parseFloat(stats.avg_fuel_consumption || 0);
+  efficiencyScore = Math.min(20, Math.max(5, 20 - Math.round(fuelConsumption * 200)));
+  
+  // Technique score - based on gear usage and RPM management
+  const gearCount = stats.unique_gears_count || (stats.gears_used ? (Array.isArray(stats.gears_used) ? stats.gears_used.length : 1) : 1);
+  const maxRPM = parseFloat(stats.max_rpm_ever || stats.rpm_max || 0);
+  
+  const gearScore = Math.min(10, gearCount * 3);
+  const rpmScore = maxRPM > 6000 ? 10 : maxRPM > 4000 ? 8 : maxRPM > 2000 ? 5 : 3;
+  
+  techniqueScore = gearScore + rpmScore;
+  
+  // Vehicle care score - based on damage
+  const damageData = stats.latest_part_damage || {};
+  const damagedParts = Object.keys(damageData).length;
+  
+  vehicleCareScore = damagedParts === 0 ? 15 : 
+    damagedParts < 3 ? 10 : 
+    damagedParts < 5 ? 5 : 2;
+  
+  // Calculate total score
+  const totalScore = speedScore + controlScore + efficiencyScore + techniqueScore + vehicleCareScore;
+  
+  // Return the score and component breakdown for detailed display
+  return {
+    total: totalScore,
+    components: {
+      speed: speedScore / 20 * 100,
+      control: controlScore / 25 * 100,
+      efficiency: efficiencyScore / 20 * 100,
+      technique: techniqueScore / 20 * 100,
+      vehicleCare: vehicleCareScore / 15 * 100
+    }
+  };
+}
+
+// Function to create concise insights if AI analysis is not available or not helpful
+function generateConciseInsights(stats) {
+  const insights = [];
+  
+  // Top speed insight
+  if (stats.speed_kmh_max || stats.wheel_speed_max) {
+    const topSpeed = Math.round(parseFloat(stats.speed_kmh_max || stats.wheel_speed_max || 0));
+    insights.push({
+      type: 'good',
+      text: `Your top speed reached ${topSpeed} km/h, showing ${topSpeed > 100 ? 'excellent' : 'good'} acceleration capabilities.`
+    });
+  }
+  
+  // Gear usage insight
+  if (stats.unique_gears_count || stats.gears_used) {
+    const gearCount = stats.unique_gears_count || 
+                     (Array.isArray(stats.gears_used) ? stats.gears_used.length : 
+                     (typeof stats.gears_used === 'string' ? JSON.parse(stats.gears_used).length : 1));
+    insights.push({
+      type: gearCount > 3 ? 'good' : 'neutral',
+      text: `You used ${gearCount} gears during your drive, demonstrating your ${gearCount > 3 ? 'good understanding' : 'basic knowledge'} of gear shifting.`
+    });
+  }
+  
+  // Brake usage insight
+  if (stats.brake_usage_count !== undefined) {
+    const brakeCount = parseInt(stats.brake_usage_count || 0);
+    insights.push({
+      type: brakeCount < 5 ? 'good' : 'bad',
+      text: `Brake usage of ${brakeCount} indicates a ${brakeCount < 5 ? 'smooth driving style' : 'need for smoother driving'}.`
+    });
+  }
+  
+  // RPM insight
+  if (stats.max_rpm_ever || stats.rpm_max) {
+    const maxRPM = Math.round(parseFloat(stats.max_rpm_ever || stats.rpm_max || 0));
+    insights.push({
+      type: 'good',
+      text: `Achieved a peak RPM of ${maxRPM.toLocaleString()}, utilizing the engine effectively.`
+    });
+  }
+  
+  // Vehicle damage insight if available
+  if (stats.latest_part_damage && Object.keys(stats.latest_part_damage).length > 0) {
+    insights.push({
+      type: 'bad',
+      text: `Vehicle damage indicates room for improved handling and collision avoidance.`
+    });
+  }
+  
+  return insights;
+}
   
 
   // Add this function after your other helper functions
@@ -329,26 +865,7 @@ function extractVerdict(analysisText) {
   return "Performance analysis not available.";
 }
 
-  function extractBulletPoints(text) {
-    if (!text) return [];
-    
-    // Remove section title
-    const contentText = text.split("\n").slice(1).join("\n");
-    
-    // Try to find bullet points
-    const bulletMatches = contentText.match(/[•\-\*]\s+(.*?)(?=\n[•\-\*]|\n\n|$)/gs);
-    if (bulletMatches && bulletMatches.length > 0) {
-      return bulletMatches
-        .map(bullet => bullet.replace(/^[•\-\*]\s+/, '').trim())
-        .filter(bullet => bullet.length > 10);
-    }
-    
-    // If no bullet points, split into sentences
-    const sentences = contentText.split(/\.\s+/);
-    return sentences
-      .map(s => s.trim())
-      .filter(s => s.length > 10 && !s.startsWith('The'));
-  }
+  
 
   // Extract key insights from a lengthy AI analysis
   function extractKeyInsights(analysisText, maxPoints = 4) {
@@ -372,6 +889,26 @@ function extractVerdict(analysisText) {
   }
   
 
+  const extractSectionFromSummary = (summary, sectionTitle) => {
+    if (!summary) return [];
+    
+    try {
+      const sectionRegex = new RegExp(`${sectionTitle}([\\s\\S]*?)(?=\\n\\n\\*\\*|$)`, 'i');
+      const sectionMatch = summary.match(sectionRegex);
+      
+      if (!sectionMatch) return [];
+      
+      // Extract bullet points (lines starting with * or number followed by *)
+      const bulletPoints = sectionMatch[1].split('\n')
+        .filter(line => line.trim().match(/^\*\s+|^\d+\.\s+\*\*/))
+        .map(line => line.trim());
+      
+      return bulletPoints;
+    } catch (e) {
+      console.error("Error extracting section:", e);
+      return [];
+    }
+  };
 
   function calculateDriverScore(stats) {
     // Base score out of 100
@@ -442,7 +979,7 @@ function extractVerdict(analysisText) {
           index: index + 1,
           sessionNumber: index + 1,
           date: dateStr,
-          topSpeed: parseFloat(session.top_speed) * 0.621, // Convert to mph
+          topSpeed: parseFloat(session.speed_kmh || session.top_speed || session.wheel_speed_max || 0),
           brakeUsage: parseInt(session.brake_usage_count, 10),
           fuelConsumption: parseFloat(session.fuel_consumption) * 100, // Convert to percentage
           acceleration: Math.round(Math.sqrt(
@@ -468,14 +1005,14 @@ function extractVerdict(analysisText) {
   const performanceMetrics = [
     { 
       title: 'Top Speed', 
-      value: `${Math.round(parseFloat(stats.wheel_speed_max || stats.top_speed_ever || 0))} mph`, 
+      value: `${Math.round(parseFloat(stats.speed_kmh_max || stats.wheel_speed_max || stats.top_speed_ever || 0))} km/h`, 
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
         </svg>
       ),
       color: 'bg-blue-500' 
-    },
+    },,
     { 
       title: 'Total Drive Time', 
       value: `${stats.total_driving_time ? 
@@ -514,6 +1051,7 @@ function extractVerdict(analysisText) {
       ),
       color: 'bg-purple-500' 
     }
+    
   ];
   
   const additionalMetrics = [
@@ -601,6 +1139,20 @@ function extractVerdict(analysisText) {
     }));
   };
 
+  const formatMarkdownText = (text) => {
+    if (!text) return '';
+    
+    // Replace ** for bold text
+    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Replace * for italic text
+    formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    return formattedText;
+  };
+
+  
+
   // Use sample data if trend data is empty
   const displayTrendData = trendData.length > 0 ? trendData : getSampleTrendData();
 
@@ -619,18 +1171,30 @@ function extractVerdict(analysisText) {
             
             {/* Player selection dropdown */}
             <div className="w-64">
-              <select 
-                className="w-full px-3 py-2 bg-blue-700 text-white rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={selectedPlayer}
-                onChange={e => setSelectedPlayer(e.target.value)}
-              >
-                <option value="">Select Player</option>
-                {playerList.map(player => (
-                  <option key={player.player_id} value={player.player_id}>
-                    {player.player_id} - Last session: {new Date(player.last_session).toLocaleDateString()}
-                  </option>
-                ))}
-              </select>
+            <select 
+            className="w-full px-3 py-2 bg-blue-700 text-white rounded border border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={selectedPlayer || ""}
+            onChange={(e) => {
+              const newPlayerId = e.target.value;
+              
+              // Update local state first
+              setSelectedPlayer(newPlayerId);
+              
+              // Then update the global context if it's available
+              if (typeof setPlayerId === 'function') {
+                setPlayerId(newPlayerId);
+              }
+              
+              console.log(`Selected player changed to: ${newPlayerId}`);
+            }}
+          >
+            <option value="">Select Player</option>
+            {playerList.map(player => (
+              <option key={player.player_id} value={player.player_id}>
+                {player.player_id} - Last session: {new Date(player.last_session).toLocaleDateString()}
+              </option>
+            ))}
+          </select>
             </div>
           </div>
           
@@ -689,25 +1253,73 @@ function extractVerdict(analysisText) {
           <VehicleDamageVisualization damageData={damageData} />
           
           {/* Key AI Insights in Cards */}
-          <div className="bg-white shadow rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Key Performance Insights</h3>
-            
-            {keyInsights.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {keyInsights.map((insight, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex items-start">
-                      <div className="p-2 rounded-full mr-3 mt-1" style={{backgroundColor: `${COLORS[index % COLORS.length]}20`}}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" style={{color: COLORS[index % COLORS.length]}} viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <p className="text-sm text-gray-700">{insight}</p>
-                    </div>
-                  </div>
-                ))}
+          {/* Key Performance Insights */}
+<div className="bg-white shadow rounded-xl p-6">
+  <h3 className="text-lg font-semibold mb-4">Key Performance Insights</h3>
+  
+  {stats.ai_insights && stats.ai_insights.performance_summary ? (
+    <div className="space-y-6">
+      {/* The Good section */}
+      <div>
+        <h4 className="font-medium text-green-700 mb-2">The Good:</h4>
+        <div className="space-y-3">
+          {extractSectionFromSummary(stats.ai_insights.performance_summary, "The Good:").map((point, index) => (
+            <div key={index} className="flex items-start">
+              <div className="flex-shrink-0 bg-green-100 rounded-full p-2 mr-3 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
               </div>
-            ) : (
+              <div 
+                className="text-gray-700"
+                dangerouslySetInnerHTML={{ __html: formatMarkdownText(point) }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* The Not-So-Good section */}
+      <div>
+        <h4 className="font-medium text-red-700 mb-2">The Not-So-Good:</h4>
+        <div className="space-y-3">
+          {extractSectionFromSummary(stats.ai_insights.performance_summary, "The Not-So-Good:").map((point, index) => (
+            <div key={index} className="flex items-start">
+              <div className="flex-shrink-0 bg-red-100 rounded-full p-2 mr-3 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div 
+                className="text-gray-700"
+                dangerouslySetInnerHTML={{ __html: formatMarkdownText(point) }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* Advanced Insights section */}
+      <div>
+        <h4 className="font-medium text-purple-700 mb-2">Advanced Insights:</h4>
+        <div className="space-y-3">
+          {extractSectionFromSummary(stats.ai_insights.performance_summary, "Advanced Insights:").map((point, index) => (
+            <div key={index} className="flex items-start">
+              <div className="flex-shrink-0 bg-purple-100 rounded-full p-2 mr-3 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div 
+                className="text-gray-700"
+                dangerouslySetInnerHTML={{ __html: formatMarkdownText(point) }}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )  : (
               // If no AI insights are available, provide default insights based on metrics
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -718,7 +1330,7 @@ function extractVerdict(analysisText) {
                       </svg>
                     </div>
                     <p className="text-sm text-gray-700">
-                      Your top speed reached {Math.round(parseFloat(stats.wheel_speed_max || 0))} mph, showing good acceleration capabilities.
+                      Your top speed reached {Math.round(parseFloat(stats.speed_kmh_max || 0))} kmph, showing good acceleration capabilities.
                     </p>
                   </div>
                 </div>
@@ -774,8 +1386,8 @@ function extractVerdict(analysisText) {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
-                  { name: 'Top Speed (mph)', value: Math.round(parseFloat(stats.top_speed_ever || stats.wheel_speed_max || 0) * 0.621) },
-                  { name: 'Avg. Speed (mph)', value: Math.round(parseFloat(stats.avg_top_speed || 0) * 0.621) },
+                  { name: 'Top Speed (km/h)', value: Math.round(parseFloat(stats.speed_kmh_max || stats.wheel_speed_max || stats.top_speed_ever || 0)) },
+                  { name: 'Avg. Speed (km/h)', value: Math.round(parseFloat(stats.speed_kmh_mean || stats.avg_top_speed || 0)) },
                   { name: 'Avg. Brake Uses', value: Math.round(parseFloat(stats.avg_brake_usage || stats.brake_usage_count || 0)) },
                   { name: 'Fuel Usage (%)', value: Math.round(parseFloat(stats.avg_fuel_consumption || 0) * 100) },
                   { name: 'Max RPM (÷1000)', value: Math.round(parseFloat(stats.max_rpm_ever || stats.rpm_max || 0) / 1000) }
@@ -794,246 +1406,252 @@ function extractVerdict(analysisText) {
             </div>
           </div>
           
-          {/* Driver Score Card with visualization */}
+          {/* Add this section to the Performance Overview in the 'overview' activeSection */}
+          {/* Coach's Comments */}
           <div className="bg-white shadow rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Driver Performance Score</h3>
+            <h3 className="text-lg font-semibold mb-4">Coach's Corner</h3>
             
-            <div className="flex flex-col md:flex-row items-center justify-between">
-              <div className="mb-6 md:mb-0">
-                <div className="relative w-40 h-40">
-                  <svg viewBox="0 0 100 100" className="w-40 h-40">
-                    {/* Background circle */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke="#e5e7eb"
-                      strokeWidth="10"
-                    />
-                    
-                    {/* Progress circle */}
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      stroke={calculateDriverScore(stats) > 70 ? "#10b981" : calculateDriverScore(stats) > 50 ? "#f59e0b" : "#ef4444"}
-                      strokeWidth="10"
-                      strokeDasharray={`${2 * Math.PI * 45 * calculateDriverScore(stats) / 100} ${2 * Math.PI * 45 * (1 - calculateDriverScore(stats) / 100)}`}
-                      strokeDashoffset={2 * Math.PI * 45 * 0.25}
-                      transform="rotate(-90 50 50)"
-                    />
-                    
-                    {/* Score text */}
-                    <text
-                      x="50"
-                      y="50"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fontSize="24"
-                      fontWeight="bold"
-                      fill="#1f2937"
-                    >
-                      {calculateDriverScore(stats)}
-                    </text>
-                    
-                    <text
-                      x="50"
-                      y="65"
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      fontSize="10"
-                      fill="#6b7280"
-                    >
-                      out of 100
-                    </text>
-                  </svg>
-                </div>
-              </div>
-              
-              <div className="md:w-2/3">
-                <h4 className="font-medium text-lg mb-2">Performance Analysis</h4>
-                <div className="space-y-4">
-                  <div className="bg-gray-50 p-3 rounded">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">Driving Smoothness</span>
-                      <span className="text-xs font-medium text-gray-700">
-                        {Math.round(Math.max(0, 100 - (parseFloat(stats.avg_brake_usage || stats.brake_usage_count || 5) * 10)))}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full" 
-                        style={{ width: `${Math.round(Math.max(0, 100 - (parseFloat(stats.avg_brake_usage || stats.brake_usage_count || 5) * 10)))}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-3 rounded">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">Fuel Efficiency</span>
-                      <span className="text-xs font-medium text-gray-700">
-                        {Math.round(Math.max(0, 100 - (parseFloat(stats.avg_fuel_consumption || 0.1) * 100)))}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-green-500 h-2 rounded-full" 
-                        style={{ width: `${Math.round(Math.max(0, 100 - (parseFloat(stats.avg_fuel_consumption || 0.1) * 100)))}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-50 p-3 rounded">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs font-medium text-gray-700">Vehicle Care</span>
-                      <span className="text-xs font-medium text-gray-700">
-                      {Object.keys(damageData).length ? 
-                      Math.round(100 - (Object.values(damageData).reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / Object.values(damageData).length * 100)) : 
-                      100}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-purple-500 h-2 rounded-full" 
-                        style={{ width: `${Object.keys(damageData).length ? Math.round(100 - (Object.values(damageData).reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / Object.values(damageData).length * 100)) : 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {stats.ai_insights && extractSectionFromSummary(stats.ai_insights.performance_summary, "Coach's Corner:").length > 0 ? (
+              <div className="space-y-3"> {/* Optional: Add spacing between points */}
+              {extractSectionFromSummary(stats.ai_insights.performance_summary, "Coach's Corner:").map((point, index) => (
+                <div
+                  key={index}
+                  className="text-gray-700" // Apply basic text styling
+                  dangerouslySetInnerHTML={{ __html: formatMarkdownText(point) }}
+                />
+              ))}
             </div>
-            
-            {/* The Verdict Section */}
-          <div className="mt-6 bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2">The Verdict</h4>
-            <p className="text-blue-700">
-              {verdictText || (
-                calculateDriverScore(stats) > 75 ? 
-                  "Excellent driving skills shown! You've demonstrated good control and efficiency." :
-                  "This driving session shows areas for improvement. Focus on smoother control and maintaining vehicle integrity."
-              )}
-            </p>
-          </div>
-
-          </div> {/* Closing Driver Score Card div */}
-          </div>
-          )}
-
-      
-      
-      {activeSection === 'performance' && (
-        <div className="space-y-6">
-          {/* Performance Trends */}
-          <div className="bg-white shadow rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Performance Trends</h3>
-            {displayTrendData.length > 0 ? (
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={displayTrendData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="sessionNumber" label={{ value: 'Session Number', position: 'insideBottom', offset: -5 }} />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      yAxisId="left"
-                      type="monotone" 
-                      dataKey="topSpeed" 
-                      name="Top Speed (mph)"
-                      stroke="#3b82f6" 
-                      activeDot={{ r: 8 }} 
-                      strokeWidth={2}
-                    />
-                    <Line 
-                      yAxisId="right"
-                      type="monotone" 
-                      dataKey="fuelConsumption" 
-                      name="Fuel Usage (%)"
-                      stroke="#10b981" 
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
             ) : (
-              <div className="text-center p-12 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No trend data available yet. Complete more sessions to see performance trends.</p>
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-gray-700">No coaching feedback available for this session.</p>
               </div>
             )}
           </div>
+
+         {/* Driver Score Card with visualization */}
+        <div className="bg-white shadow rounded-xl p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Driver Performance Score</h3>
+            
+            {/* Score explanation toggle button */}
+            <button 
+              onClick={() => setShowScoreExplanation(prev => !prev)}
+              className="text-blue-600 text-sm flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              How is this calculated?
+            </button>
+          </div>
           
-          {/* Advanced Metrics Visualization */}
-          {displayTrendData.length > 0 && (
-            <div className="bg-white shadow rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Advanced Metrics Analysis</h3>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="h-72">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Acceleration & Steering Patterns</h4>
-                  <ResponsiveContainer width="100%" height="90%">
-                    <AreaChart data={displayTrendData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="sessionNumber" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Area 
-                        type="monotone" 
-                        dataKey="acceleration" 
-                        name="Acceleration (g)" 
-                        stackId="1"
-                        stroke="#8884d8" 
-                        fill="#8884d8" 
-                        fillOpacity={0.6}
-                      />
-                      <Area 
-                        type="monotone" 
-                        dataKey="steering" 
-                        name="Steering Changes (×100)" 
-                        stackId="2"
-                        stroke="#82ca9d" 
-                        fill="#82ca9d"
-                        fillOpacity={0.6} 
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+          {/* Score explanation panel */}
+          {showScoreExplanation && (
+            <div className="mb-4 bg-blue-50 p-4 rounded-lg text-sm">
+              <h4 className="font-medium text-blue-800 mb-2">Score Calculation Methodology</h4>
+              <p className="text-blue-700 mb-2">Your driver score (out of 100) is calculated based on 5 key performance areas:</p>
+              <ul className="list-disc list-inside text-blue-700 space-y-1">
+                <li><span className="font-medium">Speed (20 points):</span> Based on top speed achieved and acceleration patterns</li>
+                <li><span className="font-medium">Control (25 points):</span> Measures brake usage and steering consistency</li>
+                <li><span className="font-medium">Efficiency (20 points):</span> Evaluates fuel consumption and resource management</li>
+                <li><span className="font-medium">Technique (20 points):</span> Assesses gear usage and RPM management</li>
+                <li><span className="font-medium">Vehicle Care (15 points):</span> Reflects vehicle damage and maintenance</li>
+              </ul>
+              <p className="text-blue-700 mt-2">Higher percentages in each category indicate better performance.</p>
+            </div>
+          )}
+          
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="mb-6 md:mb-0">
+              <div className="relative w-40 h-40">
+                <svg viewBox="0 0 100 100" className="w-40 h-40">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke="#e5e7eb"
+                    strokeWidth="10"
+                  />
+                  
+                  {/* Progress circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="none"
+                    stroke={driverScore > 70 ? "#10b981" : driverScore > 50 ? "#f59e0b" : "#ef4444"}
+                    strokeWidth="10"
+                    strokeDasharray={`${2 * Math.PI * 45 * driverScore / 100} ${2 * Math.PI * 45 * (1 - driverScore / 100)}`}
+                    strokeDashoffset={2 * Math.PI * 45 * 0.25}
+                    transform="rotate(-90 50 50)"
+                  />
+                  
+                  {/* Score text */}
+                  <text
+                    x="50"
+                    y="50"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize="24"
+                    fontWeight="bold"
+                    fill="#1f2937"
+                  >
+                    {driverScore}
+                  </text>
+                  
+                  <text
+                    x="50"
+                    y="65"
+                    textAnchor="middle"
+                    dominantBaseline="central"
+                    fontSize="10"
+                    fill="#6b7280"
+                  >
+                    out of 100
+                  </text>
+                </svg>
+              </div>
+            </div>
+            
+            <div className="md:w-2/3">
+              <h4 className="font-medium text-lg mb-2">Performance Analysis</h4>
+              <div className="space-y-4">
+                {/* Speed Score */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs font-medium text-gray-700">Speed</span>
+                    <span className="text-xs font-medium text-gray-700">
+                      {Math.round(scoreComponents?.speed || 0)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-red-500 h-2 rounded-full" 
+                      style={{ width: `${Math.round(scoreComponents?.speed || 0)}%` }}
+                    ></div>
+                  </div>
                 </div>
                 
-                <div className="h-72">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">RPM & Braking Patterns</h4>
-                  <ResponsiveContainer width="100%" height="90%">
-                    <LineChart data={displayTrendData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="sessionNumber" />
-                      <YAxis yAxisId="left" />
-                      <YAxis yAxisId="right" orientation="right" />
-                      <Tooltip />
-                      <Legend />
-                      <Line 
-                        yAxisId="left"
-                        type="monotone" 
-                        dataKey="rpm" 
-                        name="RPM (thousands)" 
-                        stroke="#f59e0b" 
-                        strokeWidth={2}
-                      />
-                      <Line 
-                        yAxisId="right"
-                        type="monotone" 
-                        dataKey="brakeUsage" 
-                        name="Brake Usage (count)" 
-                        stroke="#ef4444" 
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
+                {/* Driving Control */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs font-medium text-gray-700">Driving Control</span>
+                    <span className="text-xs font-medium text-gray-700">
+                      {Math.round(scoreComponents?.control || 0)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full" 
+                      style={{ width: `${Math.round(scoreComponents?.control || 0)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {/* Fuel Efficiency */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs font-medium text-gray-700">Fuel Efficiency</span>
+                    <span className="text-xs font-medium text-gray-700">
+                      {Math.round(scoreComponents?.efficiency || 0)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-green-500 h-2 rounded-full" 
+                      style={{ width: `${Math.round(scoreComponents?.efficiency || 0)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {/* Technique */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs font-medium text-gray-700">Technique</span>
+                    <span className="text-xs font-medium text-gray-700">
+                      {Math.round(scoreComponents?.technique || 0)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-yellow-500 h-2 rounded-full" 
+                      style={{ width: `${Math.round(scoreComponents?.technique || 0)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {/* Vehicle Care */}
+                <div className="bg-gray-50 p-3 rounded">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs font-medium text-gray-700">Vehicle Care</span>
+                    <span className="text-xs font-medium text-gray-700">
+                      {Math.round(scoreComponents?.vehicleCare || 0)}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-purple-500 h-2 rounded-full" 
+                      style={{ width: `${Math.round(scoreComponents?.vehicleCare || 0)}%` }}
+                    ></div>
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+          
+         {/* The Verdict Section */}
+         <div className="mt-6 bg-blue-50 p-4 rounded-lg">
+          <h4 className="font-medium text-blue-800 mb-2">The Verdict</h4>
+          <div 
+            className="text-blue-700"
+            dangerouslySetInnerHTML={{
+              __html: stats.ai_insights && stats.ai_insights.performance_summary ?
+                formatMarkdownText(extractVerdict(stats.ai_insights.performance_summary)) : // <-- Use extractVerdict here
+                "No verdict available for this session." // This fallback might be overridden by extractVerdict's own fallback
+            }}
+          />
+        </div>
+        </div>
+
+
+                 </div>
+          
           )}
+
+      
+      
+{activeSection === 'performance' && (
+  <div className="space-y-6">
+    {/* Visualization Data Charts */}
+    <div className="bg-white shadow rounded-xl p-6">
+      <h3 className="text-lg font-semibold mb-4">Vehicle Telemetry Visualization</h3>
+      
+      {isLoadingCharts ? (
+        <div className="flex justify-center items-center h-72">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : visualizationData.length > 0 ? (
+        <div>
+          {/* Remove the chart selector tabs and display all charts */}
+          <div className="space-y-6">
+            {visualizationData.map((chart, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <h4 className="text-md font-medium text-gray-700 mb-2">{chart.title}</h4>
+                {renderVisualizationChart(chart)}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="text-center p-12 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">No visualization data available. Complete a session to see detailed charts.</p>
+          <p className="text-gray-400 text-sm mt-2">Run a simulation from the original UI at http://localhost:8000</p>
+        </div>
+      )}
+    </div>
+    
           
           {/* Driving Style Assessment */}
           <div className="bg-white shadow rounded-xl p-6">
@@ -1048,9 +1666,9 @@ function extractVerdict(analysisText) {
                   <h4 className="font-medium">Speed Profile</h4>
                 </div>
                 <p className="text-sm text-blue-700">
-                  {parseFloat(stats.avg_top_speed || stats.wheel_speed_max || 0) > 60 ? 'Aggressive driver who pushes for speed' : 
-                   parseFloat(stats.avg_top_speed || stats.wheel_speed_max || 0) > 40 ? 'Balanced approach to speed' : 
-                   'Conservative driver who prioritizes control'}
+                {parseFloat(stats.speed_kmh_max || stats.avg_top_speed || stats.wheel_speed_max || 0) > 100 ? 'Aggressive driver who pushes for speed' : 
+                parseFloat(stats.speed_kmh_max || stats.avg_top_speed || stats.wheel_speed_max || 0) > 60 ? 'Balanced approach to speed' : 
+                'Conservative driver who prioritizes control'}
                 </p>
               </div>
               
@@ -1090,92 +1708,70 @@ function extractVerdict(analysisText) {
       
       {activeSection === 'diagnostics' && (
         <div className="space-y-6">
-          {/* DTC Code Frequency */}
-          <div className="bg-white shadow rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4">Diagnostic Code Frequency</h3>
-            
-            {dtcData.length > 0 ? (
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={dtcData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="code" type="category" width={60} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="occurrences" name="Occurrences" fill="#8884d8" radius={[0, 4, 4, 0]}>
-                      {dtcData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <div className="text-center p-6 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No diagnostic codes detected across sessions</p>
-              </div>
-            )}
-            
-            <div className="mt-4 text-sm text-gray-500">
-              <p>Most frequent diagnostic trouble codes across all driving sessions.</p>
-            </div>
-          </div>
+        
+          
           
           {/* Compact Diagnostic Analysis */}
-          {stats.ai_insights && stats.ai_insights.dtc_analysis && (
-            <div className="bg-white shadow rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">Diagnostic Summary</h3>
-              
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 bg-yellow-100 rounded-full p-2 mr-3 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-medium mb-2">DTC Analysis</h4>
-                    <div className="prose max-w-none text-sm text-gray-700">
-                      {extractKeyInsights(stats.ai_insights.dtc_analysis, 2).map((insight, index) => (
-                        <p key={index} className="mb-2">{insight}</p>
-                      ))}
-                      
-                      <button 
-                        className="text-blue-600 text-xs hover:underline font-medium mt-2 inline-flex items-center"
-                        onClick={() => alert("Full diagnostic report would be displayed in a modal")}
-                      >
-                        View Full Diagnostic Report
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-red-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-red-700 mb-2">Critical Issues</h4>
-                  <ul className="list-disc list-inside text-sm text-red-800 space-y-1">
-                    <li>Engine performance compromised</li>
-                    <li>Potential fuel system issues</li>
-                    <li>Check cooling system integrity</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-green-700 mb-2">Recommended Actions</h4>
-                  <ul className="list-disc list-inside text-sm text-green-800 space-y-1">
-                    <li>Schedule diagnostic check</li>
-                    <li>Review driving habits to reduce engine strain</li>
-                    <li>Monitor fluid levels more regularly</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
+{stats.ai_insights && stats.ai_insights.dtc_analysis && (
+  <div className="bg-white shadow rounded-xl p-6">
+    <h3 className="text-lg font-semibold mb-4">Diagnostic Summary</h3>
+
+    <div className="bg-gray-50 p-4 rounded-lg mb-4">
+      <div 
+        className="prose max-w-none text-gray-700 whitespace-pre-line"
+        dangerouslySetInnerHTML={{ __html: formatMarkdownText(stats.ai_insights.dtc_analysis) }}
+      />
+    </div>
+    
+    <div className="bg-gray-50 p-4 rounded-lg">
+      <div className="flex items-start">
+        <div className="flex-shrink-0 bg-yellow-100 rounded-full p-2 mr-3 mt-1">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+        </div>
+        <div>
+          <h4 className="font-medium mb-2">DTC Analysis</h4>
+          <div className="prose max-w-none text-sm text-gray-700">
+            {extractKeyInsights(stats.ai_insights.dtc_analysis, 2).map((insight, index) => (
+              <p key={index} className="mb-2">{insight}</p>
+            ))}
+            
+            <button 
+              className="text-blue-600 text-xs hover:underline font-medium mt-2 inline-flex items-center"
+              onClick={() => alert("Full diagnostic report would be displayed in a modal")}
+            >
+              View Full Diagnostic Report
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="bg-red-50 p-4 rounded-lg">
+        <h4 className="font-medium text-red-700 mb-2">Critical Issues</h4>
+        <ul className="list-disc list-inside text-sm text-red-800 space-y-1">
+          <li>Engine performance compromised</li>
+          <li>Potential fuel system issues</li>
+          <li>Check cooling system integrity</li>
+        </ul>
+      </div>
+      
+      <div className="bg-green-50 p-4 rounded-lg">
+        <h4 className="font-medium text-green-700 mb-2">Recommended Actions</h4>
+        <ul className="list-disc list-inside text-sm text-green-800 space-y-1">
+          <li>Schedule diagnostic check</li>
+          <li>Review driving habits to reduce engine strain</li>
+          <li>Monitor fluid levels more regularly</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
           
           {/* DTC Code Descriptions */}
           {dtcData.length > 0 && (
@@ -1234,6 +1830,7 @@ function extractVerdict(analysisText) {
         Refresh Dashboard Data
       </button>
     </div>
+    <ChatInterface />
     </div>
   );
 }

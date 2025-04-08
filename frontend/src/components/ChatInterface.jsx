@@ -22,22 +22,78 @@ const ChatInterface = () => {
     }
   }, [chatHistory]);
   
+  // Debug: Log player ID when component mounts and whenever it changes
+  useEffect(() => {
+    console.log('Current playerId in ChatInterface:', playerId);
+  }, [playerId]);
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!message.trim() || !playerId || isSubmitting) return;
+    if (!message.trim() || isSubmitting) return;
+    
+    // Use a fixed playerId if the context one is empty
+    const effectivePlayerId = playerId || "default_player_id";
     
     const userMessage = message.trim();
     setMessage('');
     addChatMessage(userMessage, true);
     setIsSubmitting(true);
     
-    // Simulate API response delay
-    setTimeout(() => {
-      const assistantResponse = "I've analyzed your vehicle data. Your driving shows good handling but there are opportunities to improve fuel efficiency. Try to maintain a more consistent speed and avoid rapid acceleration.";
-      addChatMessage(assistantResponse, false);
+    try {
+      console.log(`Sending chat message to API: ${userMessage} for player: ${effectivePlayerId}`);
+      
+      // Call the chat API endpoint
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          player_id: effectivePlayerId
+        }),
+      });
+      
+      // Log the raw response for debugging
+      console.log('Raw API response status:', response.status);
+      
+      // Early error check to provide better feedback
+      if (response.status === 404) {
+        addChatMessage(`No data found for player ID: ${effectivePlayerId}. Please run a simulation first using the original UI at http://localhost:8000`, false);
+        setIsSubmitting(false);
+        return;
+      }
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`API error ${response.status}: ${errorText}`);
+        throw new Error(`API error: ${response.status} - ${errorText}`);
+      }
+      
+      const contentType = response.headers.get('content-type');
+      console.log('Response content type:', contentType);
+      
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error(`Expected JSON response but got ${contentType}`);
+        throw new Error(`Expected JSON but got ${contentType || 'unknown'} response`);
+      }
+      
+      const data = await response.json();
+      console.log('Parsed response data:', data);
+      
+      if (data && data.response) {
+        addChatMessage(data.response, false);
+      } else {
+        console.error('Response missing expected "response" field:', data);
+        throw new Error('Invalid response format from server');
+      }
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      addChatMessage("Sorry, I couldn't process your request. Please try again later. Error: " + error.message, false);
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
   
   // Suggestions for chat
@@ -71,7 +127,7 @@ const ChatInterface = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <h3 className="font-medium">Drive Assistant</h3>
+          <h3 className="font-medium">Drive Assistant {playerId ? `(${playerId})` : ''}</h3>
         </div>
         <button
           onClick={() => setIsChatOpen(false)}
@@ -83,6 +139,15 @@ const ChatInterface = () => {
           </svg>
         </button>
       </div>
+      
+      {/* Player ID warning if missing */}
+      {!playerId && (
+        <div className="bg-yellow-50 p-3 border-b border-yellow-100">
+          <p className="text-yellow-700 text-sm">
+            <strong>Note:</strong> No player ID detected. Please run a simulation first or select a player.
+          </p>
+        </div>
+      )}
       
       {/* Chat messages */}
       <div className="flex-1 p-4 overflow-y-auto bg-gray-50">

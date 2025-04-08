@@ -1,9 +1,13 @@
 import os
 from pathlib import Path
 
+
+
 # Project paths
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "telematics"
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(BASE_DIR / "data-connect-demo4-2cfbc645dade.json")
 
 # Ensure data directory exists
 DATA_DIR.mkdir(exist_ok=True)
@@ -20,7 +24,7 @@ BEAMNG_USER = str(BASE_DIR / "user")
 # Service Account Configuration
 # Path to your service account key file
 SERVICE_ACCOUNT_KEY_PATH = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", 
-                                    str(BASE_DIR / "data-connect-demo4-51c24a9eabe4.json"))
+                                    str(BASE_DIR / "data-connect-demo4-2cfbc645dade.json"))
 
 # If the key file exists, set the environment variable
 if os.path.exists(SERVICE_ACCOUNT_KEY_PATH):

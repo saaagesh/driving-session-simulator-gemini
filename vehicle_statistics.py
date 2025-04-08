@@ -38,6 +38,9 @@ def aggregate_statistics(data):
     throttle_stats = data['throttle'].agg(['min', 'max', 'mean']).to_dict()
     water_temp_stats = data['water_temperature'].agg(['min', 'max', 'mean']).to_dict()
     wheel_speed_stats = data['wheelspeed'].agg(['min', 'max', 'mean']).to_dict()
+    speed_kmh_stats = {}
+    if 'speed_kmh' in data.columns:
+        speed_kmh_stats = data['speed_kmh'].agg(['min', 'max', 'mean']).to_dict()
     horn_usage_count = data['horn'].sum()
 
     summary = {
@@ -57,6 +60,7 @@ def aggregate_statistics(data):
         "Steering Changes": steering_changes,
         "Throttle Stats": throttle_stats,
         "Water Temperature Stats": water_temp_stats,
+        "Speed KMH Stats": speed_kmh_stats,  # Add the new speed stats
         "Wheel Speed Stats": wheel_speed_stats,
         "Horn Usage Count": horn_usage_count,
     }

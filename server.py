@@ -217,6 +217,10 @@ async def generate_summary_endpoint(player: Player) -> Dict:
             "wheel_speed_min": summary.get("Wheel Speed Stats", {}).get("min"),
             "wheel_speed_max": summary.get("Wheel Speed Stats", {}).get("max"),
             "wheel_speed_mean": summary.get("Wheel Speed Stats", {}).get("mean"),
+            # Add the new speed fields
+            "speed_kmh_min": summary.get("Speed KMH Stats", {}).get("min"),
+            "speed_kmh_max": summary.get("Speed KMH Stats", {}).get("max"),
+            "speed_kmh_mean": summary.get("Speed KMH Stats", {}).get("mean"),
             "horn_usage_count": summary.get("Horn Usage Count")
         }
         
@@ -229,19 +233,94 @@ async def generate_summary_endpoint(player: Player) -> Dict:
         
         # Generate AI content for performance summary
         logging.info("Generating content")
+        # responses = model.generate_content(
+        #     f"""{summary}\n\n Above are the statistics for the vehicle with player_id: {player_id}, 
+        #     Generate a summary and insights from the vehicle performance statistics obtained from a 
+        #     BeamNG.drive simulation driven by the player. The data reflects various performance 
+        #     metrics recorded on an automation test track. Given the statistics, provide insights 
+        #     and recommendations for the player to improve their driving skills and vehicle performance. 
+        #     The summary should be in a conversational format and should be easy to understand for the player. 
+        #     Round off the numbers to 2 decimal places use imperial units\n 
+        #     Be a Critic and a Coach. Provide constructive feedback and suggestions for improvement.""",
+        #     generation_config={
+        #         "max_output_tokens": 2048,
+        #         "temperature": 0,
+        #         "top_p": 1
+        #     },
+        #     stream=False,
+        # )
+
         responses = model.generate_content(
-            f"""{summary}\n\n Above are the statistics for the vehicle with player_id: {player_id}, 
-            Generate a summary and insights from the vehicle performance statistics obtained from a 
-            BeamNG.drive simulation driven by the player. The data reflects various performance 
-            metrics recorded on an automation test track. Given the statistics, provide insights 
-            and recommendations for the player to improve their driving skills and vehicle performance. 
-            The summary should be in a conversational format and should be easy to understand for the player. 
-            Round off the numbers to 2 decimal places use imperial units\n 
-            Be a Critic and a Coach. Provide constructive feedback and suggestions for improvement.""",
+            f"""# Vehicle Performance Analysis for Player: {player_id}
+
+        PERFORMANCE STATISTICS:
+        {summary}
+
+        INSTRUCTIONS:
+        Analyze the above vehicle performance statistics from a BeamNG.drive simulation. Focus on providing a comprehensive yet concise performance assessment with actionable feedback.
+
+        KEY ANALYSIS POINTS:
+        1. SPEED ANALYSIS:
+        - Use "Speed KMH Stats" as the primary speed metric (this represents actual vehicle speed)
+        - Convert km/h to mph in your explanations (multiply by 0.621371)
+        - Compare top speed achieved against typical performance for this type of vehicle
+        - Calculate acceleration rate based on speed changes and time
+        - Identify any wheel slip by comparing wheel speed to actual vehicle speed
+
+        2. DRIVING EFFICIENCY:
+        - Calculate fuel efficiency (fuel used per distance or time)
+        - Analyze gear usage distribution and optimal shifting points
+        - Evaluate braking efficiency (frequency vs. necessity)
+        - Assess throttle control smoothness
+
+        3. DRIVING STYLE ASSESSMENT:
+        - Determine if driving style is aggressive, moderate, or conservative based on:
+            * Acceleration patterns
+            * Braking frequency and intensity
+            * RPM ranges maintained
+            * Steering input smoothness
+        - Identify potential oversteering or understeering from lateral acceleration data
+
+        4. ADVANCED METRICS (CALCULATE THESE):
+        - Wheel slip ratio: Compare wheel speed to actual vehicle speed
+        - G-force analysis: Combine X, Y, Z acceleration data to assess overall forces
+        - Cornering efficiency: Analyze lateral acceleration vs. speed in turns
+        - Shift efficiency: Calculate average RPM at shift points
+        - Vehicle stress indicators: Correlate temperature changes with driving intensity
+
+        5. VEHICLE CONDITION:
+        - Analyze part damage and its likely causes
+        - Evaluate engine performance based on temperature and RPM data
+        - Identify potential mechanical issues based on unusual patterns
+
+        STRUCTURE YOUR RESPONSE LIKE THIS:
+        The Good:
+        - [List 2-3 positive aspects of the player's performance]
+        - [Include specific metrics to support your points]
+
+        The Not-So-Good:
+        - [List 2-3 areas where the player could improve]
+        - [Include specific metrics to support your points]
+
+        Advanced Insights:
+        - [Include 2-3 insights from the advanced metrics calculated]
+        - [Explain what these metrics reveal about driving style or vehicle performance]
+
+        The Verdict:
+        [A brief overall assessment of the player's performance]
+
+        Coach's Corner:
+        - [Provide 3-5 specific, actionable tips to improve driving performance]
+        - [Suggest optimal RPM ranges for gear shifts]
+        - [Recommend braking techniques based on their patterns]
+        - [Offer advice on reducing vehicle damage]
+
+        Use conversational language that's easy to understand. Round numbers to 2 decimal places and use imperial units (mph, etc.) in your explanations. Be both a critic and a coach - balance constructive criticism with positive reinforcement.
+        """,
             generation_config={
                 "max_output_tokens": 2048,
-                "temperature": 0,
-                "top_p": 1
+                "temperature": 0.2,
+                "top_p": 0.95
             },
             stream=False,
         )

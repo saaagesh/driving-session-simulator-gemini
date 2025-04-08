@@ -22,13 +22,13 @@ function ModernHeader({ currentPath }) {
       console.log('Refresh result:', result);
       
       // Add a success message to session storage for display after reload
-      sessionStorage.setItem('refreshSuccess', 'Dashboard data refreshed successfully');
+      sessionStorage.setItem('refreshSuccess', 'Dashboard data refreshed successfully from BigQuery');
       
       // Simply reload the page to display fresh data
       window.location.reload();
     } catch (error) {
       console.error('Error refreshing data:', error);
-      setRefreshError(error.message || 'Failed to refresh data');
+      setRefreshError(error.message || 'Failed to refresh data from BigQuery');
     } finally {
       setIsRefreshing(false);
     }
@@ -48,6 +48,16 @@ function ModernHeader({ currentPath }) {
             <div>
               <h1 className="font-bold text-xl text-gray-900">Drive Analytics</h1>
               <p className="text-xs text-gray-500">BeamNG Performance Insights</p>
+            </div>
+            
+            {/* Google Cloud Logo */}
+            <div className="flex items-center ml-4 border-l pl-4 border-gray-200">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Google_Cloud_logo.svg/320px-Google_Cloud_logo.svg.png" 
+                alt="Google Cloud" 
+                className="h-6" 
+              />
+              <span className="text-xs text-gray-500 ml-2 hidden sm:inline">Powered by Gemini</span>
             </div>
           </div>
           
@@ -75,14 +85,14 @@ function ModernHeader({ currentPath }) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Refreshing...
+                  Refreshing from BigQuery...
                 </>
               ) : (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
                   </svg>
-                  Refresh Data
+                  Refresh from BigQuery
                 </>
               )}
             </button>
@@ -146,14 +156,14 @@ function ModernHeader({ currentPath }) {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Refreshing...
+                  Refreshing from BigQuery...
                 </>
               ) : (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
                   </svg>
-                  Refresh Data
+                  Refresh from BigQuery
                 </>
               )}
             </button>
@@ -166,9 +176,27 @@ function ModernHeader({ currentPath }) {
             Error: {refreshError}
           </div>
         )}
+        
+        {/* Add a success message display that automatically fades out */}
+        {sessionStorage.getItem('refreshSuccess') && (
+          <div className="mt-2 p-2 bg-green-50 text-green-600 rounded-md text-sm animate-fade-out">
+            Success: {sessionStorage.getItem('refreshSuccess')}
+          </div>
+        )}
       </div>
     </header>
   );
+}
+
+// Add script to clear the success message from session storage after it's displayed
+if (typeof window !== 'undefined') {
+  window.addEventListener('load', () => {
+    if (sessionStorage.getItem('refreshSuccess')) {
+      setTimeout(() => {
+        sessionStorage.removeItem('refreshSuccess');
+      }, 5000); // Remove after 5 seconds
+    }
+  });
 }
 
 export default ModernHeader;
